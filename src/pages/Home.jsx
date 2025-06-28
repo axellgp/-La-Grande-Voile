@@ -122,9 +122,21 @@ const HeroButton = styled(motion.div)`
     text-decoration: none;
     box-shadow: ${props => props.theme.shadows.lg};
 
+    @media (max-width: 768px) {
+      padding: ${props => props.theme.spacing[3]} ${props => props.theme.spacing[6]};
+      font-size: ${props => props.theme.fontSizes.md};
+      width: 100%;
+      justify-content: center;
+      max-width: 280px;
+    }
+
     &:hover {
       transform: translateY(-3px);
       box-shadow: ${props => props.theme.shadows.xl};
+
+      @media (max-width: 768px) {
+        transform: translateY(-2px);
+      }
     }
   }
 
@@ -253,6 +265,12 @@ const FeaturesGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: ${props => props.theme.spacing[8]};
   margin-top: ${props => props.theme.spacing[12]};
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: ${props => props.theme.spacing[6]};
+    margin-top: ${props => props.theme.spacing[8]};
+  }
 `
 
 const FeatureCard = styled(motion.div)`
@@ -264,10 +282,18 @@ const FeatureCard = styled(motion.div)`
   text-align: center;
   transition: all ${props => props.theme.transitions.normal};
 
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing[6]};
+  }
+
   &:hover {
     transform: translateY(-5px);
     background: rgba(255, 255, 255, 0.15);
     border-color: ${props => props.theme.colors.accent.gold};
+
+    @media (max-width: 768px) {
+      transform: translateY(-3px);
+    }
   }
 
   .icon {
@@ -280,17 +306,32 @@ const FeatureCard = styled(motion.div)`
     align-items: center;
     justify-content: center;
     color: ${props => props.theme.colors.neutral.white};
+
+    @media (max-width: 768px) {
+      width: 50px;
+      height: 50px;
+      margin-bottom: ${props => props.theme.spacing[4]};
+    }
   }
 
   h3 {
     color: inherit;
     margin-bottom: ${props => props.theme.spacing[4]};
+
+    @media (max-width: 768px) {
+      font-size: ${props => props.theme.fontSizes.lg};
+      margin-bottom: ${props => props.theme.spacing[3]};
+    }
   }
 
   p {
     color: inherit;
     opacity: 0.9;
     line-height: 1.6;
+
+    @media (max-width: 768px) {
+      font-size: ${props => props.theme.fontSizes.sm};
+    }
   }
 `
 
@@ -497,15 +538,91 @@ const ActivityCard = styled(motion.div)`
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: ${props => props.theme.radii['2xl']};
-  padding: ${props => props.theme.spacing[8]};
-  text-align: center;
+  overflow: hidden;
   cursor: pointer;
   transition: all ${props => props.theme.transitions.normal};
+  display: flex;
+  flex-direction: column;
 
   &:hover {
     transform: translateY(-10px);
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .activity-image {
+    position: relative;
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+    }
+
+    @media (max-width: 768px) {
+      height: 150px;
+    }
+  }
+
+  .activity-icon {
+    position: relative;
+    z-index: 2;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${props => props.theme.colors.primary.main};
+    box-shadow: ${props => props.theme.shadows.lg};
+
+    @media (max-width: 768px) {
+      width: 50px;
+      height: 50px;
+    }
+  }
+
+  .activity-content {
+    padding: ${props => props.theme.spacing[6]};
+    text-align: center;
+    flex: 1;
+
+    @media (max-width: 768px) {
+      padding: ${props => props.theme.spacing[4]};
+    }
+
+    h4 {
+      color: ${props => props.theme.colors.neutral.white};
+      margin-bottom: ${props => props.theme.spacing[3]};
+      font-size: ${props => props.theme.fontSizes.lg};
+
+      @media (max-width: 768px) {
+        font-size: ${props => props.theme.fontSizes.md};
+      }
+    }
+
+    p {
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.6;
+      margin-bottom: ${props => props.theme.spacing[4]};
+      font-size: ${props => props.theme.fontSizes.sm};
+
+      @media (max-width: 768px) {
+        font-size: ${props => props.theme.fontSizes.xs};
+        margin-bottom: ${props => props.theme.spacing[3]};
+      }
+    }
   }
 
   .icon {
@@ -543,6 +660,11 @@ const ActivityCard = styled(motion.div)`
     align-items: center;
     gap: ${props => props.theme.spacing[2]};
     transition: all ${props => props.theme.transitions.fast};
+
+    @media (max-width: 768px) {
+      padding: ${props => props.theme.spacing[2]} ${props => props.theme.spacing[4]};
+      font-size: ${props => props.theme.fontSizes.sm};
+    }
 
     &:hover {
       background: rgba(255, 255, 255, 0.3);

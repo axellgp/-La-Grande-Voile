@@ -14,6 +14,12 @@ const LoginPage = styled.div`
   justify-content: center;
   background: linear-gradient(135deg, ${props => props.theme.colors.primary.main}, ${props => props.theme.colors.secondary.main});
   padding: ${props => props.theme.spacing[4]};
+
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing[2]};
+    align-items: flex-start;
+    padding-top: ${props => props.theme.spacing[8]};
+  }
 `
 
 const LoginContainer = styled(motion.div)`
@@ -23,6 +29,11 @@ const LoginContainer = styled(motion.div)`
   overflow: hidden;
   width: 100%;
   max-width: 400px;
+
+  @media (max-width: 768px) {
+    max-width: 95vw;
+    margin: 0 auto;
+  }
 `
 
 const LoginHeader = styled.div`
@@ -31,19 +42,35 @@ const LoginHeader = styled.div`
   padding: ${props => props.theme.spacing[8]} ${props => props.theme.spacing[6]};
   text-align: center;
 
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing[6]} ${props => props.theme.spacing[4]};
+  }
+
   h1 {
     color: ${props => props.theme.colors.neutral.white};
     margin-bottom: ${props => props.theme.spacing[2]};
+
+    @media (max-width: 768px) {
+      font-size: ${props => props.theme.fontSizes.xl};
+    }
   }
 
   p {
     color: rgba(255, 255, 255, 0.9);
     opacity: 0.9;
+
+    @media (max-width: 768px) {
+      font-size: ${props => props.theme.fontSizes.sm};
+    }
   }
 `
 
 const LoginForm = styled.form`
   padding: ${props => props.theme.spacing[8]} ${props => props.theme.spacing[6]};
+
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing[6]} ${props => props.theme.spacing[4]};
+  }
 `
 
 const FormGroup = styled.div`
@@ -142,10 +169,18 @@ const SubmitButton = styled.button`
 
 const LoginLinks = styled.div`
   text-align: center;
+  margin-top: ${props => props.theme.spacing[6]};
+  padding-top: ${props => props.theme.spacing[4]};
+  border-top: 1px solid ${props => props.theme.colors.neutral[200]};
   
   p {
     color: ${props => props.theme.colors.neutral[600]};
-    margin-bottom: ${props => props.theme.spacing[4]};
+    margin-bottom: ${props => props.theme.spacing[3]};
+
+    @media (max-width: 768px) {
+      font-size: ${props => props.theme.fontSizes.sm};
+      margin-bottom: ${props => props.theme.spacing[2]};
+    }
   }
 
   a {
@@ -155,6 +190,10 @@ const LoginLinks = styled.div`
 
     &:hover {
       text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      font-size: ${props => props.theme.fontSizes.sm};
     }
   }
 `

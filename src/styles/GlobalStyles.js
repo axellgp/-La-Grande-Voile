@@ -92,6 +92,22 @@ const GlobalStyles = createGlobalStyle`
       border-color: ${props => props.theme.colors.primary.main};
       box-shadow: 0 0 0 3px ${props => props.theme.colors.primary.main}1a;
     }
+
+    @media (max-width: 768px) {
+      padding: ${props => props.theme.spacing[2]} ${props => props.theme.spacing[3]};
+      font-size: 16px; /* Prevent zoom on iOS */
+    }
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    html {
+      font-size: 14px;
+    }
+    
+    body {
+      overflow-x: hidden;
+    }
   }
 
   /* Scrollbar styling */
