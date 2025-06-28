@@ -2,6 +2,8 @@
 
 Un site web moderne et élégant pour l'hôtel "La Grande Voile" à Banyuls-sur-Mer, France.
 
+🔗 **Site en ligne**: https://axellgp.github.io/-La-Grande-Voile/
+
 ## ✨ Fonctionnalités
 
 ### 🏨 Pour les Clients
