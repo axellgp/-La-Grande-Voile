@@ -1,80 +1,82 @@
 // Images marines et sous-marines pour La Grande Voile
+import { getPublicImagePath } from '../../../utils/imageUtils';
+
 export const marineImages = {
   // Plongée et vie sous-marine
   diving: {
-    underwater: '/images/marine/underwater.jpg',
-    diver: '/images/marine/diver.jpg',
-    coral: '/images/marine/coral.jpg',
-    marine_reserve: '/images/marine/marine-reserve.jpg'
+    underwater: getPublicImagePath('images/marine/underwater.jpg'),
+    diver: getPublicImagePath('images/marine/diver.jpg'),
+    coral: getPublicImagePath('images/marine/coral.jpg'),
+    marine_reserve: getPublicImagePath('images/marine/marine-reserve.jpg')
   },
   
   // Poissons méditerranéens
   fish: {
-    merou: '/images/marine/merou.jpg',
-    sea_bass: '/images/marine/sea-bass.jpg',
-    dorade: '/images/marine/dorade.jpg',
-    school_fish: '/images/marine/underwater.jpg'
+    merou: getPublicImagePath('images/marine/merou.jpg'),
+    sea_bass: getPublicImagePath('images/marine/sea-bass.jpg'),
+    dorade: getPublicImagePath('images/marine/dorade.jpg'),
+    school_fish: getPublicImagePath('images/marine/underwater.jpg')
   },
   
   // Poulpes et céphalopodes
   octopus: {
-    octopus: '/images/marine/octopus.jpg',
-    seiche: '/images/marine/seiche.jpg',
-    tentacles: '/images/marine/octopus.jpg'
+    octopus: getPublicImagePath('images/marine/octopus.jpg'),
+    seiche: getPublicImagePath('images/marine/seiche.jpg'),
+    tentacles: getPublicImagePath('images/marine/octopus.jpg')
   },
   
   // Fonds marins méditerranéens
   seafloor: {
-    posidonia: '/images/marine/posidonia.jpg',
-    rocks: '/images/marine/rocks.jpg',
-    mediterranean_floor: '/images/marine/mediterranean-floor.jpg'
+    posidonia: getPublicImagePath('images/marine/posidonia.jpg'),
+    rocks: getPublicImagePath('images/marine/rocks.jpg'),
+    mediterranean_floor: getPublicImagePath('images/marine/mediterranean-floor.jpg')
   },
   
   // Activités nautiques à Banyuls
   activities: {
-    snorkeling: '/images/marine/snorkeling.jpg',
-    boat_tour: '/images/marine/boat-tour.jpg',
-    kayak: '/images/marine/kayak.jpg',
-    sailing: '/images/marine/sailing.jpg'
+    snorkeling: getPublicImagePath('images/marine/snorkeling.jpg'),
+    boat_tour: getPublicImagePath('images/marine/boat-tour.jpg'),
+    kayak: getPublicImagePath('images/marine/kayak.jpg'),
+    sailing: getPublicImagePath('images/marine/sailing.jpg')
   }
 }
 
 // Images de plongée et sous-marines
 export const divingImages = {
-    underwater: '/images/marine/underwater.jpg',
-    diver: '/images/marine/diver.jpg',
-    coral: '/images/marine/coral.jpg',
-    marine_reserve: '/images/marine/marine-reserve.jpg'
+    underwater: getPublicImagePath('images/marine/underwater.jpg'),
+    diver: getPublicImagePath('images/marine/diver.jpg'),
+    coral: getPublicImagePath('images/marine/coral.jpg'),
+    marine_reserve: getPublicImagePath('images/marine/marine-reserve.jpg')
 }
 
 // Images de poissons méditerranéens  
 export const fishImages = {
-    merou: '/images/marine/merou.jpg',
-    sea_bass: '/images/marine/sea-bass.jpg',
-    dorade: '/images/marine/dorade.jpg',
-    school_fish: '/images/marine/underwater.jpg'
+    merou: getPublicImagePath('images/marine/merou.jpg'),
+    sea_bass: getPublicImagePath('images/marine/sea-bass.jpg'),
+    dorade: getPublicImagePath('images/marine/dorade.jpg'),
+    school_fish: getPublicImagePath('images/marine/underwater.jpg')
 }
 
 // Images de céphalopodes
 export const cephalopodImages = {
-    octopus: '/images/marine/octopus.jpg',
-    seiche: '/images/marine/seiche.jpg',
-    tentacles: '/images/marine/octopus.jpg'
+    octopus: getPublicImagePath('images/marine/octopus.jpg'),
+    seiche: getPublicImagePath('images/marine/seiche.jpg'),
+    tentacles: getPublicImagePath('images/marine/octopus.jpg')
 }
 
 // Images du fond marin
 export const seaFloorImages = {
-    posidonia: '/images/marine/posidonia.jpg',
-    rocks: '/images/marine/rocks.jpg',
-    mediterranean_floor: '/images/marine/mediterranean-floor.jpg'
+    posidonia: getPublicImagePath('images/marine/posidonia.jpg'),
+    rocks: getPublicImagePath('images/marine/rocks.jpg'),
+    mediterranean_floor: getPublicImagePath('images/marine/mediterranean-floor.jpg')
 }
 
 // Images d'activités marines
 export const marineActivities = {
-    snorkeling: '/images/marine/snorkeling.jpg',
-    boat_tour: '/images/marine/boat-tour.jpg',
-    kayak: '/images/marine/kayak.jpg',
-    sailing: '/images/marine/sailing.jpg'
+    snorkeling: getPublicImagePath('images/marine/snorkeling.jpg'),
+    boat_tour: getPublicImagePath('images/marine/boat-tour.jpg'),
+    kayak: getPublicImagePath('images/marine/kayak.jpg'),
+    sailing: getPublicImagePath('images/marine/sailing.jpg')
 }
 
 // Icônes marines (SVG ou emoji pour les composants)

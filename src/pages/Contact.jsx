@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { MapPin, Phone, Mail, Clock, Send, MessageCircle, Star, Fish, Waves, Camera, Users } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { MarineElements } from '../components/MarineElements'
+import { getPublicImagePath } from '../utils/imageUtils'
 
 const ContactPage = styled.div`
   padding-top: 100px;
@@ -494,22 +495,22 @@ const Contact = () => {
     {
       name: 'Musée Maillol',
       description: 'Découvrez l\'œuvre d\'Aristide Maillol, sculpteur né à Banyuls, dans sa maison natale transformée en musée.',
-      image: '/images/marine/diver.jpg',
+      image: getPublicImagePath('images/marine/diver.jpg'),
     },
     {
       name: 'Caves viticoles',
       description: 'Visitez les caves et dégustez les fameux vins de Banyuls et Collioure dans les domaines en terrasses.',
-      image: '/images/marine/kayak.jpg',
+      image: getPublicImagePath('images/marine/kayak.jpg'),
     },
     {
       name: 'Sentier sous-marin',
       description: 'Explorez la réserve marine naturelle avec masque et tuba sur un sentier balisé unique en Méditerranée.',
-      image: '/images/marine/marine-reserve.jpg',
+      image: getPublicImagePath('images/marine/marine-reserve.jpg'),
     },
     {
       name: 'Tour Madeloc',
       description: 'Randonnée jusqu\'à cette tour de guet du XIVe siècle offrant un panorama exceptionnel sur la côte.',
-      image: '/images/marine/sailing.jpg',
+      image: getPublicImagePath('images/marine/sailing.jpg'),
     },
   ]
 

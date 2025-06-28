@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { motion } from 'framer-motion'
+import { getPublicImagePath } from '../utils/imageUtils'
 import { 
   MapPin, 
   Star, 
@@ -24,7 +25,7 @@ const HeroSection = styled.section`
   background: linear-gradient(
     rgba(0, 0, 0, 0.4),
     rgba(0, 0, 0, 0.4)
-  ), url('/images/banyuls/coastline.jpg');
+  ), url('${getPublicImagePath('images/banyuls/coastline.jpg')}');
   background-size: cover;
   background-position: center;
   height: 60vh;
@@ -274,7 +275,7 @@ const About = () => {
             </TextContent>
             <ImageContent>
               <img 
-                src="/images/appartements/vaisseau-amiral/SALON-VAISSEAU-AMIRAL.png" 
+                src={getPublicImagePath('images/appartements/vaisseau-amiral/SALON-VAISSEAU-AMIRAL.png')} 
                 alt="Vue sur la baie de Banyuls"
               />
             </ImageContent>
@@ -494,7 +495,7 @@ const About = () => {
             <TextGrid style={{ marginTop: '3rem' }}>
               <ImageContent>
                 <img 
-                  src="/images/marine/marine-reserve.jpg" 
+                  src={getPublicImagePath('images/marine/marine-reserve.jpg')} 
                   alt="Terrasse avec vue mer"
                 />
               </ImageContent>

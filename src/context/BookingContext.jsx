@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { getPublicImagePath } from '../utils/imageUtils'
 import { vaisseauAmiralImages, vaisseauAmiralPlan } from '../assets/images/appartements/vaisseau-amiral'
 import { caravelleImages, caravellePlan } from '../assets/images/appartements/caravelle'
 import { goeletteImages, goelettePlan } from '../assets/images/appartements/goelette'
@@ -25,7 +26,7 @@ export const BookingProvider = ({ children }) => {
       title: 'La Grande Voile',
       subtitle: 'Résidence de standing à Banyuls-sur-Mer',
       description: 'LA GRANDE VOILE à BANYULS SUR MER allie parfaitement l\'intimité et le calme d\'un bel appartement et la convivialité d\'un authentique village catalan.',
-      backgroundImage: '/images/hero/hero1.jpg'
+      backgroundImage: getPublicImagePath('images/hero/hero1.jpg')
     },
     about: {
       title: 'Une expérience unique',
@@ -56,9 +57,9 @@ export const BookingProvider = ({ children }) => {
     email: 'contact@lagrandevoile.fr',
     website: 'https://www.lagrandevoile.fr',
     images: [
-      '/images/appartements/vaisseau-amiral/SALON-VAISSEAU-AMIRAL.png',
-      '/images/appartements/caravelle/SALON-CARAVELLE.png',
-      '/images/appartements/goelette/SEJOUR-GOELETTE.png'
+      getPublicImagePath('images/appartements/vaisseau-amiral/SALON-VAISSEAU-AMIRAL.png'),
+      getPublicImagePath('images/appartements/caravelle/SALON-CARAVELLE.png'),
+      getPublicImagePath('images/appartements/goelette/SEJOUR-GOELETTE.png')
     ],
     policies: {
       checkIn: '16:00',

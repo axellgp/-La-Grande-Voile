@@ -6,6 +6,7 @@ import { Calendar, MapPin, Star, Users, Wifi, Car, Coffee, Heart, ChevronRight, 
 import { useInView } from 'react-intersection-observer'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules'
+import { getPublicImagePath } from '../utils/imageUtils'
 
 import { useBooking } from '../context/BookingContext'
 import { heroImages } from '../assets/images'
@@ -612,42 +613,42 @@ const Home = () => {
       title: 'Plongée Sous-Marine',
       description: 'Explorez la réserve marine de Banyuls-Cerbère, l\'une des plus belles de Méditerranée. Découvrez la vie sous-marine exceptionnelle.',
       link: '/activites/plongee',
-      image: '/src/assets/images/banyuls/diving.jpg'
+      image: getPublicImagePath('images/marine/diver.jpg')
     },
     {
       icon: <Grape size={30} />,
       title: 'Œnotourisme',
       description: 'Dégustez les fameux vins de Banyuls AOC dans nos vignobles en terrasses face à la mer. Visites et dégustations organisées.',
       link: '/activites/vin',
-      image: '/src/assets/images/banyuls/vineyard.jpg'
+      image: getPublicImagePath('images/banyuls/vineyards.jpg')
     },
     {
       icon: <Mountain size={30} />,
       title: 'Randonnées',
       description: 'Parcourez les sentiers du littoral et des Pyrénées catalanes. Vues panoramiques sur la Méditerranée et l\'Espagne.',
       link: '/activites/randonnee',
-      image: '/src/assets/images/banyuls/hiking.jpg'
+      image: getPublicImagePath('images/banyuls/coastline.jpg')
     },
     {
       icon: <Sailboat size={30} />,
       title: 'Navigation',
       description: 'Louez un voilier ou participez à nos sorties en mer. Découvrez la côte depuis les flots bleus de la Méditerranée.',
       link: '/activites/voile',
-      image: '/src/assets/images/banyuls/sailing.jpg'
+      image: getPublicImagePath('images/marine/sailing.jpg')
     },
     {
       icon: <Camera size={30} />,
       title: 'Patrimoine Culturel',
       description: 'Visitez les œuvres d\'Aristide Maillol, les tours Madeloc, et découvrez l\'histoire riche de Banyuls-sur-Mer.',
       link: '/activites/culture',
-      image: '/src/assets/images/banyuls/culture.jpg'
+      image: getPublicImagePath('images/banyuls/port.jpg')
     },
     {
       icon: <Compass size={30} />,
       title: 'Excursions',
       description: 'Découvrez la Costa Brava espagnole, Collioure, Port-Vendres et tous les trésors de la Côte Vermeille.',
       link: '/activites/excursions',
-      image: '/src/assets/images/banyuls/coast.jpg'
+      image: getPublicImagePath('images/banyuls/coastline.jpg')
     }
   ]
 
@@ -811,7 +812,7 @@ const Home = () => {
               >
                 <div
                   className="activity-image"
-                  style={{ backgroundImage: `url(${activity.image || '/src/assets/images/banyuls/default-activity.jpg'})` }}
+                  style={{ backgroundImage: `url(${activity.image || getPublicImagePath('images/banyuls/coastline.jpg')})` }}
                 >
                   <div className="activity-icon">
                     {activity.icon}

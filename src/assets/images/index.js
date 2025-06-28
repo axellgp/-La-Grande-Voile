@@ -1,4 +1,5 @@
 // Index principal des images de La Grande Voile
+import { getPublicImagePath } from '../../utils/imageUtils';
 
 // Imports des images d'appartements
 import vaisseauAmiralImagesArray, { vaisseauAmiralPlan } from './appartements/vaisseau-amiral'
@@ -75,7 +76,7 @@ export const getAppartementImages = (appartementId) => {
 
 // Images par défaut
 export const defaultImages = {
-  apartment: '/images/appartements/vaisseau-amiral/SALON-VAISSEAU-AMIRAL.png',
-  hero: '/images/hero/hero1.jpg',
-  marine: '/images/marine/underwater.jpg'
+  apartment: getPublicImagePath('images/appartements/vaisseau-amiral/SALON-VAISSEAU-AMIRAL.png'),
+  hero: getPublicImagePath('images/hero/hero1.jpg'),
+  marine: getPublicImagePath('images/marine/underwater.jpg')
 }
