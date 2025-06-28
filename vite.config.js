@@ -18,7 +18,7 @@ export default defineConfig(({ command }) => {
 
   // Ajouter le base path seulement pour la production (GitHub Pages)
   if (command === 'build') {
-    config.base = '/la-grande-voile/'
+    config.base = '/-La-Grande-Voile/'
   }
 
   return config
