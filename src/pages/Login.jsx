@@ -198,17 +198,41 @@ const LoginLinks = styled.div`
   }
 `
 
-const ForgotPassword = styled.div`
-  text-align: right;
+const DemoCredentials = styled.div`
+  background: ${props => props.theme.colors.neutral[50]};
+  border: 1px solid ${props => props.theme.colors.neutral[200]};
+  border-radius: ${props => props.theme.radii.lg};
+  padding: ${props => props.theme.spacing[4]};
   margin-bottom: ${props => props.theme.spacing[6]};
-  
-  a {
-    color: ${props => props.theme.colors.primary.main};
-    font-size: ${props => props.theme.fontSizes.sm};
-    text-decoration: none;
 
-    &:hover {
-      text-decoration: underline;
+  h4 {
+    color: ${props => props.theme.colors.neutral[800]};
+    margin-bottom: ${props => props.theme.spacing[3]};
+    font-size: ${props => props.theme.fontSizes.sm};
+  }
+
+  .demo-account {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: ${props => props.theme.spacing[2]};
+    font-size: ${props => props.theme.fontSizes.sm};
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      color: ${props => props.theme.colors.neutral[600]};
+    }
+
+    .credentials {
+      color: ${props => props.theme.colors.neutral[800]};
+      font-family: monospace;
+      background: ${props => props.theme.colors.neutral.white};
+      padding: ${props => props.theme.spacing[1]} ${props => props.theme.spacing[2]};
+      border-radius: ${props => props.theme.radii.sm};
+      border: 1px solid ${props => props.theme.colors.neutral[200]};
     }
   }
 `
@@ -223,6 +247,7 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm()
 
   const onSubmit = async (data) => {
@@ -238,10 +263,15 @@ const Login = () => {
         toast.error(result.error)
       }
     } catch (error) {
-      toast.error('Une erreur est survenue lors de la connexion')
+      toast.error('Une erreur est survenue')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const fillDemoCredentials = (email, password) => {
+    setValue('email', email)
+    setValue('password', password)
   }
 
   return (
@@ -257,6 +287,32 @@ const Login = () => {
         </LoginHeader>
 
         <LoginForm onSubmit={handleSubmit(onSubmit)}>
+          <DemoCredentials>
+            <h4>Comptes de démonstration :</h4>
+            <div className="demo-account">
+              <span className="label">Admin :</span>
+              <button
+                type="button"
+                className="credentials"
+                onClick={() => fillDemoCredentials('admin@lagrandevoile.com', 'admin123')}
+                style={{ cursor: 'pointer', border: 'none', background: 'transparent' }}
+              >
+                admin@lagrandevoile.com / admin123
+              </button>
+            </div>
+            <div className="demo-account">
+              <span className="label">Client :</span>
+              <button
+                type="button"
+                className="credentials"
+                onClick={() => fillDemoCredentials('client@example.com', 'client123')}
+                style={{ cursor: 'pointer', border: 'none', background: 'transparent' }}
+              >
+                client@example.com / client123
+              </button>
+            </div>
+          </DemoCredentials>
+
           <FormGroup>
             <label htmlFor="email">Email</label>
             <div className="input-container">
@@ -273,7 +329,6 @@ const Login = () => {
                   },
                 })}
                 placeholder="votre@email.com"
-                autoComplete="email"
               />
             </div>
             {errors.email && (
@@ -297,13 +352,11 @@ const Login = () => {
                   },
                 })}
                 placeholder="Votre mot de passe"
-                autoComplete="current-password"
               />
               <button
                 type="button"
                 className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -312,10 +365,6 @@ const Login = () => {
               <div className="error-message">{errors.password.message}</div>
             )}
           </FormGroup>
-
-          <ForgotPassword>
-            <Link to="/forgot-password">Mot de passe oublié ?</Link>
-          </ForgotPassword>
 
           <SubmitButton type="submit" disabled={isLoading}>
             {isLoading ? 'Connexion...' : 'Se connecter'}
