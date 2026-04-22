@@ -5,19 +5,30 @@
 }
 
 :root {
-  /* Mediterranean Color Palette inspired by Banyuls-sur-Mer */
-  --primary-blue: #1e3a8a; /* Deep Mediterranean blue */
-  --primary-blue-light: #3b82f6;
-  --secondary-blue: #0ea5e9; /* Sky blue */
-  --accent-gold: #f59e0b; /* Sunset gold */
-  --accent-coral: #f97316; /* Mediterranean coral */
-  --accent-terracotta: #dc2626; /* Terracotta red */
+  /* Mediterranean & Marine Color Palette inspired by Banyuls-sur-Mer */
+  --ocean-deep: #0a1628;      /* Abyssal depths */
+  --ocean-navy: #1e3a5f;      /* Deep sea navy */
+  --mediterranean: #1e5f74;   /* Mediterranean teal */
+  --lagoon: #2d9b9b;          /* Lagoon turquoise */
+  --aqua: #4ecdc4;            /* Aqua marine */
+  --foam: #a8e6cf;            /* Sea foam */
+  --coral: #ff6b6b;           /* Living coral */
+  --sunset: #ff8c42;          /* Sunset orange */
+  --sand: #f4e4c1;            /* Beach sand */
+  --shell: #fff9f0;           /* Shell white */
+  --gold: #d4af37;            /* Mediterranean gold */
+  --pearl: #f8f6f4;           /* Pearl white */
+  
+  /* Gradient definitions */
+  --gradient-ocean: linear-gradient(135deg, var(--ocean-deep) 0%, var(--mediterranean) 50%, var(--lagoon) 100%);
+  --gradient-sunset: linear-gradient(135deg, var(--coral) 0%, var(--sunset) 50%, var(--gold) 100%);
+  --gradient-lagoon: linear-gradient(135deg, var(--lagoon) 0%, var(--aqua) 100%);
+  --gradient-deep: linear-gradient(180deg, var(--ocean-deep) 0%, var(--ocean-navy) 100%);
   
   /* Neutral colors */
   --white: #ffffff;
   --cream: #fef7ed;
   --beige: #f5f5dc;
-  --sand: #f4f1e8;
   --gray-100: #f7fafc;
   --gray-200: #edf2f7;
   --gray-300: #e2e8f0;
@@ -31,23 +42,29 @@
   /* Typography */
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Inter', sans-serif;
+  --font-accent: 'Cormorant Garamond', serif;
   
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* Shadows with ocean feel */
+  --shadow-sm: 0 1px 2px 0 rgba(10, 22, 40, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(10, 22, 40, 0.1), 0 2px 4px -1px rgba(10, 22, 40, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(10, 22, 40, 0.1), 0 4px 6px -2px rgba(10, 22, 40, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(10, 22, 40, 0.15), 0 10px 10px -5px rgba(10, 22, 40, 0.04);
+  --shadow-glow: 0 0 30px rgba(78, 205, 196, 0.3);
+  --shadow-underwater: 0 20px 40px rgba(30, 95, 116, 0.4);
   
   /* Transitions */
-  --transition-fast: 0.15s ease-in-out;
-  --transition-normal: 0.3s ease-in-out;
-  --transition-slow: 0.5s ease-in-out;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-wave: 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   
   /* Border radius */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
+  --radius-xxl: 2rem;
+  --radius-full: 9999px;
 }
 
 html {
@@ -257,7 +274,7 @@ input:focus, textarea:focus, select:focus {
   background: var(--gray-500);
 }
 
-/* Loading animation */
+/* Marine & Ocean Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -271,6 +288,199 @@ input:focus, textarea:focus, select:focus {
 
 .fade-in {
   animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes bubble {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-100px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes current {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes deepPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(78, 205, 196, 0.6), 0 0 60px rgba(45, 155, 155, 0.4);
+  }
+}
+
+.float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.wave {
+  animation: wave 3s ease-in-out infinite;
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 3s infinite;
+}
+
+.bubble {
+  animation: bubble 2s ease-out forwards;
+}
+
+/* Underwater caustic effect */
+@keyframes caustics {
+  0%, 100% {
+    background-position: 0 0;
+  }
+  25% {
+    background-position: 100px 50px;
+  }
+  50% {
+    background-position: 50px 100px;
+  }
+  75% {
+    background-position: -50px 50px;
+  }
+}
+
+.caustic-overlay {
+  position: relative;
+  overflow: hidden;
+}
+
+.caustic-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.008' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+  animation: caustics 20s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Wave divider SVG pattern */
+.wave-divider {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  line-height: 0;
+}
+
+.wave-divider svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Glass morphism effect for underwater feel */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-underwater);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: var(--gradient-ocean);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-sunset {
+  background: var(--gradient-sunset);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Button hover water ripple effect */
+.btn-water-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-water-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-water-ripple:hover::after {
+  width: 300px;
+  height: 300px;
 }
 
 /* Responsive design */
