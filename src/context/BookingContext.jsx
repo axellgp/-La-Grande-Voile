@@ -1,13 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { getPublicImagePath } from '../utils/imageUtils'
 import { vaisseauAmiralImages, vaisseauAmiralPlan } from '../assets/images/appartements/vaisseau-amiral'
 import { caravelleImages, caravellePlan } from '../assets/images/appartements/caravelle'
 import { goeletteImages, goelettePlan } from '../assets/images/appartements/goelette'
 import { quatreMatsImages, quatreMatsPlan } from '../assets/images/appartements/quatre-mats'
 import { drakkarImages, drakkarPlan } from '../assets/images/appartements/drakkar'
 import { jonqueImages, jonquePlan } from '../assets/images/appartements/jonque'
+import {
+  defaultHotelSettings,
+  defaultSiteContent,
+  mergeDeep,
+} from '../data/siteContentDefaults'
 
 const BookingContext = createContext()
+const HOTEL_SETTINGS_STORAGE_KEY = 'lagrandevoile_hotel_settings'
+const SITE_CONTENT_STORAGE_KEY = 'lagrandevoile_site_content'
+
+const loadStoredState = (storageKey, defaults) => {
+  if (typeof window === 'undefined') return defaults
+
+  try {
+    const raw = window.localStorage.getItem(storageKey)
+    if (!raw) return defaults
+    return mergeDeep(defaults, JSON.parse(raw))
+  } catch (error) {
+    console.warn(`Unable to load ${storageKey}`, error)
+    return defaults
+  }
+}
 
 export const useBooking = () => {
   const context = useContext(BookingContext)
@@ -21,63 +40,12 @@ export const BookingProvider = ({ children }) => {
   const [bookings, setBookings] = useState([])
   const [bookingRequests, setBookingRequests] = useState([])
   const [rooms, setRooms] = useState([])
-  const [siteContent, setSiteContent] = useState({
-    hero: {
-      title: 'La Grande Voile',
-      subtitle: 'Résidence de standing à Banyuls-sur-Mer',
-      description: 'LA GRANDE VOILE à BANYULS SUR MER allie parfaitement l\'intimité et le calme d\'un bel appartement et la convivialité d\'un authentique village catalan.',
-      backgroundImage: getPublicImagePath('images/hero/hero1.jpg')
-    },
-    about: {
-      title: 'Une expérience unique',
-      description: 'Cette Résidence de Standing, les pieds dans l\'eau, vous accueille dans ses grands appartements du T2 (40m²+ un balcon-terrasse) au T5/6 (180m² avec terrasse) pour partager les moments privilégiés de vos vacances en couple en famille ou entre amis.',
-      features: [
-        'Chambre avec salle d\'eau ou de bain privative',
-        'Ascenseur dans la résidence',
-        'Vue sur la mer exceptionnelle',
-        'Terrasse ou balcon privé',
-        'Télé et WiFi gratuit',
-        'Équipements haut de gamme'
-      ]
-    },
-    contact: {
-      title: 'Contactez-nous',
-      description: 'Pour toute demande d\'information, vous pouvez nous contacter',
-      address: '45 Avenue de la République, 66650 Banyuls-sur-Mer, France',
-      phone: '06 87 82 10 16',
-      email: 'contact@lagrandevoile.fr'
-    }
-  })
-  const [hotelSettings, setHotelSettings] = useState({
-    name: 'La Grande Voile',
-    description: 'Résidence de standing à Banyuls-sur-Mer - Les pieds dans l\'eau',
-    tagline: 'LA GRANDE VOILE à BANYULS SUR MER allie parfaitement l\'intimité et le calme d\'un bel appartement et la convivialité d\'un authentique village catalan.',
-    address: '45 Avenue de la République, 66650 Banyuls-sur-Mer, France',
-    phone: '06 87 82 10 16',
-    email: 'contact@lagrandevoile.fr',
-    website: 'https://www.lagrandevoile.fr',
-    images: [
-      getPublicImagePath('images/appartements/vaisseau-amiral/SALON-VAISSEAU-AMIRAL.png'),
-      getPublicImagePath('images/appartements/caravelle/SALON-CARAVELLE.png'),
-      getPublicImagePath('images/appartements/goelette/SEJOUR-GOELETTE.png')
-    ],
-    policies: {
-      checkIn: '16:00',
-      checkOut: '10:00',
-      cancellation: 'Annulation gratuite jusqu\'à 7 jours avant l\'arrivée',
-      children: 'Les enfants sont les bienvenus',
-      pets: 'Animaux non admis',
-      deposit: 'Caution de 500€ demandée à l\'arrivée'
-    },
-    features: [
-      'Ascenseur dans la résidence',
-      'WiFi gratuit dans tous les appartements',
-      'Vue mer exceptionnelle',
-      'Terrasses et balcons privés',
-      'Equipements haut de gamme',
-      'Proximité plage et centre-ville'
-    ]
-  })
+  const [siteContent, setSiteContent] = useState(() =>
+    loadStoredState(SITE_CONTENT_STORAGE_KEY, defaultSiteContent)
+  )
+  const [hotelSettings, setHotelSettings] = useState(() =>
+    loadStoredState(HOTEL_SETTINGS_STORAGE_KEY, defaultHotelSettings)
+  )
 
   // Real apartment data from La Grande Voile website
   const realApartments = [
@@ -747,6 +715,16 @@ export const BookingProvider = ({ children }) => {
     setBookingRequests(mockBookingRequests)
   }, [])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.localStorage.setItem(SITE_CONTENT_STORAGE_KEY, JSON.stringify(siteContent))
+  }, [siteContent])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.localStorage.setItem(HOTEL_SETTINGS_STORAGE_KEY, JSON.stringify(hotelSettings))
+  }, [hotelSettings])
+
   // Utility functions
   const getCurrentSeason = (date) => {
     const checkDate = new Date(date)
@@ -891,10 +869,36 @@ export const BookingProvider = ({ children }) => {
   }
 
   const updateSiteContent = (section, content) => {
-    setSiteContent(prev => ({
-      ...prev,
-      [section]: { ...prev[section], ...content }
-    }))
+    setSiteContent(prev => {
+      const currentSection = prev[section]
+
+      if (Array.isArray(currentSection)) {
+        return {
+          ...prev,
+          [section]: Array.isArray(content) ? content : currentSection
+        }
+      }
+
+      if (typeof currentSection === 'object' && currentSection !== null) {
+        return {
+          ...prev,
+          [section]: { ...currentSection, ...content }
+        }
+      }
+
+      return {
+        ...prev,
+        [section]: content
+      }
+    })
+  }
+
+  const replaceSiteContent = (nextSiteContent) => {
+    setSiteContent(mergeDeep(defaultSiteContent, nextSiteContent))
+  }
+
+  const resetSiteContent = () => {
+    setSiteContent(defaultSiteContent)
   }
 
   const updateRoomData = (roomId, updates) => {
@@ -1054,6 +1058,8 @@ export const BookingProvider = ({ children }) => {
     // Admin functions
     updateHotelSettings,
     updateSiteContent,
+    replaceSiteContent,
+    resetSiteContent,
     updateRoomData,
     updateRoom,
     addRoom,

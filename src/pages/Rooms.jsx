@@ -27,7 +27,7 @@ const HeroPanel = styled.div`
   background:
     radial-gradient(circle at 85% 18%, rgba(88, 199, 212, 0.2), transparent 25%),
     radial-gradient(circle at 10% 20%, rgba(246, 197, 119, 0.14), transparent 18%),
-    rgba(8, 29, 44, 0.86);
+    rgba(255, 255, 255, 0.94);
   box-shadow: ${({ theme }) => theme.shadows.lg};
   overflow: hidden;
 
@@ -57,8 +57,8 @@ const HeroStats = styled.div`
 const HeroStat = styled.div`
   padding: ${({ theme }) => theme.spacing[5]};
   border-radius: ${({ theme }) => theme.radii.xl};
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(180, 224, 241, 0.08);
+  background: rgba(18, 58, 99, 0.04);
+  border: 1px solid rgba(18, 58, 99, 0.08);
 
   strong {
     display: block;
@@ -86,7 +86,7 @@ const ControlsPanel = styled.div`
   padding: ${({ theme }) => theme.spacing[6]};
   border-radius: ${({ theme }) => theme.radii['2xl']};
   border: 1px solid ${({ theme }) => theme.colors.surface.border};
-  background: rgba(8, 29, 44, 0.7);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
 `
 
@@ -110,9 +110,9 @@ const FilterButton = styled.button`
   padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
   border-radius: ${({ theme }) => theme.radii.full};
   border: 1px solid ${({ $active }) =>
-    $active ? 'rgba(135, 237, 246, 0.3)' : 'rgba(180, 224, 241, 0.1)'};
+    $active ? 'rgba(47, 109, 162, 0.18)' : 'rgba(18, 58, 99, 0.08)'};
   background: ${({ $active }) =>
-    $active ? 'rgba(99, 211, 223, 0.12)' : 'rgba(255, 255, 255, 0.04)'};
+    $active ? 'rgba(47, 109, 162, 0.1)' : 'rgba(18, 58, 99, 0.03)'};
   color: ${({ theme, $active }) =>
     $active ? theme.colors.neutral.white : theme.colors.neutral[300]};
   font-weight: ${({ theme }) => theme.fontWeights.semibold};
@@ -146,7 +146,7 @@ const RoomCard = styled(motion.article)`
   overflow: hidden;
   border-radius: ${({ theme }) => theme.radii['3xl']};
   border: 1px solid ${({ theme }) => theme.colors.surface.border};
-  background: rgba(8, 29, 44, 0.86);
+  background: rgba(255, 255, 255, 0.94);
   box-shadow: ${({ theme }) => theme.shadows.base};
 
   .media {
@@ -165,7 +165,7 @@ const RoomCard = styled(motion.article)`
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, transparent 20%, rgba(4, 16, 28, 0.82) 100%);
+    background: linear-gradient(180deg, transparent 20%, rgba(18, 58, 99, 0.14) 100%);
   }
 
   .badge-row {
@@ -181,8 +181,8 @@ const RoomCard = styled(motion.article)`
   .badge {
     padding: 0.45rem 0.85rem;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(8, 29, 44, 0.72);
+    border: 1px solid rgba(18, 58, 99, 0.08);
+    background: rgba(255, 255, 255, 0.9);
     color: ${({ theme }) => theme.colors.neutral.white};
     font-size: 0.72rem;
     text-transform: uppercase;
@@ -216,7 +216,7 @@ const RoomCard = styled(motion.article)`
     gap: 0.35rem;
     padding: 0.55rem 0.85rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(18, 58, 99, 0.05);
     color: ${({ theme }) => theme.colors.neutral[200]};
     font-size: ${({ theme }) => theme.fontSizes.sm};
   }
@@ -231,7 +231,7 @@ const RoomCard = styled(motion.article)`
   .amenities span {
     padding: 0.45rem 0.75rem;
     border-radius: 999px;
-    background: rgba(99, 211, 223, 0.08);
+    background: rgba(18, 58, 99, 0.06);
     color: ${({ theme }) => theme.colors.secondary.light};
     font-size: 0.78rem;
   }
@@ -250,7 +250,7 @@ const EmptyState = styled.div`
   padding: ${({ theme }) => theme.spacing[8]};
   border-radius: ${({ theme }) => theme.radii['2xl']};
   border: 1px solid ${({ theme }) => theme.colors.surface.border};
-  background: rgba(8, 29, 44, 0.76);
+  background: rgba(255, 255, 255, 0.9);
 
   p {
     margin: ${({ theme }) => `${theme.spacing[3]} 0 ${theme.spacing[5]}`};
@@ -455,3 +455,4 @@ const Rooms = () => {
 }
 
 export default Rooms
+

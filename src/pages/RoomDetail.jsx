@@ -44,7 +44,7 @@ const BackButton = styled.button`
   padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
   border-radius: ${({ theme }) => theme.radii.full};
   border: 1px solid ${({ theme }) => theme.colors.surface.border};
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(18, 58, 99, 0.04);
   color: ${({ theme }) => theme.colors.neutral.white};
 `
 
@@ -77,7 +77,7 @@ const Gallery = styled(motion.section)`
   padding: ${({ theme }) => theme.spacing[5]};
   border-radius: ${({ theme }) => theme.radii['3xl']};
   border: 1px solid ${({ theme }) => theme.colors.surface.border};
-  background: rgba(8, 29, 44, 0.84);
+  background: rgba(255, 255, 255, 0.94);
   box-shadow: ${({ theme }) => theme.shadows.base};
 `
 
@@ -93,7 +93,7 @@ const MainImage = styled.div`
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, transparent 30%, rgba(4, 16, 28, 0.78) 100%);
+    background: linear-gradient(180deg, transparent 30%, rgba(18, 58, 99, 0.14) 100%);
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
@@ -116,9 +116,9 @@ const Thumbnail = styled.button`
   height: 5.5rem;
   border-radius: ${({ theme }) => theme.radii.lg};
   border: 1px solid ${({ $active }) =>
-    $active ? 'rgba(135, 237, 246, 0.3)' : 'rgba(180, 224, 241, 0.08)'};
+    $active ? 'rgba(47, 109, 162, 0.18)' : 'rgba(18, 58, 99, 0.08)'};
   background:
-    linear-gradient(180deg, rgba(4, 16, 28, 0.1), rgba(4, 16, 28, 0.55)),
+    linear-gradient(180deg, rgba(18, 58, 99, 0.04), rgba(18, 58, 99, 0.12)),
     url('${({ $image }) => $image}') center/cover no-repeat;
   box-shadow: ${({ $active, theme }) => ($active ? theme.shadows.glow : 'none')};
 `
@@ -130,7 +130,7 @@ const Summary = styled(motion.aside)`
   padding: ${({ theme }) => theme.spacing[6]};
   border-radius: ${({ theme }) => theme.radii['3xl']};
   border: 1px solid ${({ theme }) => theme.colors.surface.border};
-  background: rgba(8, 29, 44, 0.92);
+  background: rgba(255, 255, 255, 0.96);
   box-shadow: ${({ theme }) => theme.shadows.lg};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
@@ -155,7 +155,7 @@ const Meta = styled.div`
     gap: 0.35rem;
     padding: 0.55rem 0.85rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(18, 58, 99, 0.05);
     color: ${({ theme }) => theme.colors.neutral[200]};
     font-size: ${({ theme }) => theme.fontSizes.sm};
   }
@@ -167,8 +167,8 @@ const PricePanel = styled.div`
   margin: ${({ theme }) => `${theme.spacing[5]} 0`};
   padding: ${({ theme }) => theme.spacing[5]};
   border-radius: ${({ theme }) => theme.radii['2xl']};
-  background: linear-gradient(180deg, rgba(88, 199, 212, 0.12), rgba(8, 29, 44, 0.16));
-  border: 1px solid rgba(135, 237, 246, 0.12);
+  background: linear-gradient(180deg, rgba(95, 167, 200, 0.08), rgba(255, 255, 255, 0.9));
+  border: 1px solid rgba(18, 58, 99, 0.08);
 
   .row {
     display: flex;
@@ -199,7 +199,7 @@ const DetailCard = styled(motion.article)`
   padding: ${({ theme }) => theme.spacing[6]};
   border-radius: ${({ theme }) => theme.radii['2xl']};
   border: 1px solid ${({ theme }) => theme.colors.surface.border};
-  background: rgba(8, 29, 44, 0.74);
+  background: rgba(255, 255, 255, 0.92);
   box-shadow: ${({ theme }) => theme.shadows.base};
 
   h2 {
@@ -225,8 +225,8 @@ const FeatureGrid = styled.div`
 const Feature = styled.div`
   padding: ${({ theme }) => theme.spacing[5]};
   border-radius: ${({ theme }) => theme.radii.xl};
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(180, 224, 241, 0.08);
+  background: rgba(18, 58, 99, 0.04);
+  border: 1px solid rgba(18, 58, 99, 0.08);
 
   strong {
     display: block;
@@ -252,7 +252,7 @@ const Amenities = styled.div`
   span {
     padding: 0.55rem 0.85rem;
     border-radius: 999px;
-    background: rgba(99, 211, 223, 0.08);
+    background: rgba(18, 58, 99, 0.06);
     color: ${({ theme }) => theme.colors.secondary.light};
     font-size: ${({ theme }) => theme.fontSizes.sm};
   }
@@ -265,7 +265,7 @@ const EmptyState = styled.div`
   padding: ${({ theme }) => theme.spacing[8]};
   border-radius: ${({ theme }) => theme.radii['2xl']};
   border: 1px solid ${({ theme }) => theme.colors.surface.border};
-  background: rgba(8, 29, 44, 0.8);
+  background: rgba(255, 255, 255, 0.92);
 `
 
 const RoomDetail = () => {
@@ -452,3 +452,4 @@ const RoomDetail = () => {
 }
 
 export default RoomDetail
+

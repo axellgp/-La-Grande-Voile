@@ -1,530 +1,274 @@
 import React from 'react'
 import styled from 'styled-components'
 import { motion } from 'framer-motion'
-import { getPublicImagePath } from '../utils/imageUtils'
-import { 
-  MapPin, 
-  Star, 
-  Heart, 
-  Wine, 
-  Camera, 
-  Mountain, 
-  Waves,
-  Sun,
-  Fish,
-  Compass,
-  Shield
-} from 'lucide-react'
+import { Compass, Home, MapPin, Waves } from 'lucide-react'
+import { useBooking } from '../context/BookingContext'
 
-const Container = styled.div`
-  min-height: 100vh;
-  padding-top: 100px;
+const Page = styled.div`
+  padding-top: 7rem;
 `
 
-const HeroSection = styled.section`
-  background: linear-gradient(
-    rgba(0, 0, 0, 0.4),
-    rgba(0, 0, 0, 0.4)
-  ), url('${getPublicImagePath('images/banyuls/coastline.jpg')}');
-  background-size: cover;
-  background-position: center;
-  height: 60vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  text-align: center;
+const Hero = styled.section`
+  padding: ${({ theme }) => `${theme.spacing[10]} 0 ${theme.spacing[12]}`};
 `
 
-const HeroContent = styled(motion.div)`
-  max-width: 800px;
-  padding: 0 2rem;
-`
-
-const HeroTitle = styled.h1`
-  font-family: ${props => props.theme.fonts.heading};
-  font-size: 3.5rem;
-  margin-bottom: 1rem;
-
-  @media (max-width: 768px) {
-    font-size: 2.5rem;
-  }
-`
-
-const HeroSubtitle = styled.p`
-  font-size: 1.3rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-`
-
-const Content = styled.div`
-  max-width: 1200px;
+const HeroPanel = styled.div`
+  width: min(1240px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 4rem 2rem;
-`
-
-const Section = styled(motion.section)`
-  margin-bottom: 4rem;
-`
-
-const SectionTitle = styled.h2`
-  font-family: ${props => props.theme.fonts.heading};
-  font-size: 2.5rem;
-  color: ${props => props.theme.colors.primary};
-  text-align: center;
-  margin-bottom: 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-`
-
-const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
-`
-
-const Card = styled(motion.div)`
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  text-align: center;
-`
-
-const CardIcon = styled.div`
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, ${props => props.theme.colors.secondary} 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-  color: white;
-`
-
-const CardTitle = styled.h3`
-  font-family: ${props => props.theme.fonts.heading};
-  font-size: 1.5rem;
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: 1rem;
-`
-
-const CardText = styled.p`
-  color: ${props => props.theme.colors.darkGray};
-  line-height: 1.6;
-`
-
-const TextGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+  gap: ${({ theme }) => theme.spacing[8]};
   align-items: center;
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-`
-
-const TextContent = styled(motion.div)`
-  
-`
-
-const ImageContent = styled(motion.div)`
-  img {
-    width: 100%;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  }
-`
-
-const Highlight = styled.span`
-  color: ${props => props.theme.colors.secondary};
-  font-weight: 600;
-`
-
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  margin: 3rem 0;
-`
-
-const StatCard = styled(motion.div)`
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, ${props => props.theme.colors.secondary} 100%);
-  color: white;
-  padding: 2rem;
-  border-radius: 20px;
-  text-align: center;
-`
-
-const StatNumber = styled.div`
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-`
-
-const StatLabel = styled.div`
-  font-size: 1.1rem;
-  opacity: 0.9;
-`
-
-const ServicesGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
-  margin: 3rem 0;
-
-  @media (max-width: 1200px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (max-width: 768px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
     grid-template-columns: 1fr;
   }
 `
 
-const ServiceCard = styled(motion.div)`
-  background: white;
-  border-radius: 20px;
-  padding: 2.5rem 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  text-align: center;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
+const HeroCopy = styled(motion.div)`
+  h1 {
+    margin: ${({ theme }) => `${theme.spacing[4]} 0 ${theme.spacing[4]}`};
+    max-width: 12ch;
+  }
 
-  &:hover {
-    border-color: ${props => props.theme.colors.lightBlue};
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  p {
+    max-width: 38rem;
+    font-size: ${({ theme }) => theme.fontSizes.lg};
+    color: ${({ theme }) => theme.colors.neutral[600]};
   }
 `
 
-const ServiceIcon = styled.div`
-  width: 80px;
-  height: 80px;
-  background: #f8f9fa;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-  border: 2px solid #e9ecef;
+const HeroImage = styled(motion.div)`
+  min-height: 32rem;
+  border-radius: ${({ theme }) => theme.radii['3xl']};
+  background:
+    linear-gradient(180deg, rgba(18, 58, 99, 0.08), rgba(18, 58, 99, 0.18)),
+    url('${({ $image }) => $image}') center/cover no-repeat;
+  box-shadow: ${({ theme }) => theme.shadows.lg};
 `
 
-const ServiceTitle = styled.h3`
-  font-family: ${props => props.theme.fonts.heading};
-  font-size: 1.4rem;
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: 1rem;
-  font-weight: 600;
+const Section = styled.section`
+  padding: ${({ theme }) => theme.spacing[14]} 0;
 `
 
-const ServiceText = styled.p`
-  color: ${props => props.theme.colors.darkGray};
-  line-height: 1.6;
-  font-size: 0.95rem;
+const SectionInner = styled.div`
+  width: min(1240px, calc(100% - 2rem));
+  margin: 0 auto;
+`
+
+const StoryGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+  gap: ${({ theme }) => theme.spacing[6]};
+  align-items: start;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const StoryCard = styled(motion.article)`
+  padding: ${({ theme }) => theme.spacing[7]};
+  border-radius: ${({ theme }) => theme.radii['3xl']};
+  background: ${({ theme }) => theme.colors.surface.cardStrong};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  box-shadow: ${({ theme }) => theme.shadows.base};
+
+  h2 {
+    margin: ${({ theme }) => `${theme.spacing[4]} 0 ${theme.spacing[4]}`};
+  }
+
+  p + p {
+    margin-top: ${({ theme }) => theme.spacing[4]};
+  }
+`
+
+const FactsColumn = styled.div`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[4]};
+`
+
+const FactCard = styled(motion.article)`
+  padding: ${({ theme }) => theme.spacing[5]};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  box-shadow: ${({ theme }) => theme.shadows.base};
+
+  svg {
+    color: ${({ theme }) => theme.colors.secondary.dark};
+    margin-bottom: ${({ theme }) => theme.spacing[3]};
+  }
+
+  h3 {
+    margin-bottom: ${({ theme }) => theme.spacing[2]};
+  }
+
+  p {
+    color: ${({ theme }) => theme.colors.neutral[600]};
+  }
+`
+
+const GalleryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing[5]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const GalleryCard = styled(motion.article)`
+  overflow: hidden;
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  background: ${({ theme }) => theme.colors.surface.cardStrong};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  box-shadow: ${({ theme }) => theme.shadows.base};
+
+  .image {
+    height: 16rem;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .body {
+    padding: ${({ theme }) => theme.spacing[5]};
+  }
+
+  h3 {
+    margin-bottom: ${({ theme }) => theme.spacing[2]};
+  }
+
+  p {
+    color: ${({ theme }) => theme.colors.neutral[600]};
+  }
 `
 
 const About = () => {
+  const { siteContent, hotelSettings } = useBooking()
+
+  const facts = [
+    {
+      icon: <Home size={20} />,
+      title: 'Residence haut de gamme',
+      text: 'Des appartements pensés pour des sejours longs, lumineux et confortables, plutot qu un simple passage.',
+    },
+    {
+      icon: <Waves size={20} />,
+      title: 'Baie et reserve marine',
+      text: 'La mer n est pas ici un decor secondaire : elle structure l image du lieu et la qualite de l experience.',
+    },
+    {
+      icon: <Compass size={20} />,
+      title: 'Territoire fort',
+      text: 'Banyuls, ses vignes, sa culture et sa cote donnent au site une matiere editoriale plus authentique.',
+    },
+  ]
+
   return (
-    <Container>
-      <HeroSection>
-        <HeroContent
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <HeroTitle>À propos de La Grande Voile</HeroTitle>
-          <HeroSubtitle>
-            Découvrez notre résidence de standing et la perle de la Côte Vermeille
-          </HeroSubtitle>
-        </HeroContent>
-      </HeroSection>
+    <Page>
+      <Hero>
+        <HeroPanel>
+          <HeroCopy
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="eyebrow">{siteContent.about.eyebrow}</span>
+            <h1>{siteContent.about.heroTitle}</h1>
+            <p>{siteContent.about.heroText}</p>
+          </HeroCopy>
 
-      <Content>
-        <Section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-        >
-          <SectionTitle>
-            <Heart size={32} />
-            Notre Histoire
-          </SectionTitle>
-          <TextGrid>
-            <TextContent>
-              <p style={{ fontSize: '1.1rem', lineHeight: '1.8', marginBottom: '1.5rem' }}>
-                <Highlight>La Grande Voile</Highlight> vous accueille dans un cadre d'exception à Banyuls-sur-Mer, 
-                cette perle de la Côte Vermeille où la Méditerranée rencontre les Pyrénées.
+          <HeroImage
+            $image={siteContent.about.image}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.08 }}
+          />
+        </HeroPanel>
+      </Hero>
+
+      <Section>
+        <SectionInner>
+          <StoryGrid>
+            <StoryCard
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <span className="eyebrow">{siteContent.about.storyTitle}</span>
+              <h2>La Grande Voile, pensée comme une vraie adresse.</h2>
+              {siteContent.about.storyParagraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+              <p style={{ marginTop: '1.5rem', fontWeight: 600 }}>
+                {hotelSettings.tagline}
               </p>
-              <p style={{ fontSize: '1.1rem', lineHeight: '1.8', marginBottom: '1.5rem' }}>
-                Notre résidence de standing allie parfaitement l'intimité et le calme d'un bel appartement 
-                avec la convivialité d'un authentique village catalan. Chaque appartement, du T2 au T5/6, 
-                offre une <Highlight>vue imprenable sur la baie</Highlight> et des équipements haut de gamme.
-              </p>
-              <p style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-                Que vous veniez en couple, en famille ou entre amis, La Grande Voile vous garantit 
-                des moments privilégiés dans un environnement préservé, à quelques mètres des plages 
-                et du centre historique de Banyuls.
-              </p>
-            </TextContent>
-            <ImageContent>
-              <img 
-                src={getPublicImagePath('images/appartements/vaisseau-amiral/SALON-VAISSEAU-AMIRAL.png')} 
-                alt="Vue sur la baie de Banyuls"
-              />
-            </ImageContent>
-          </TextGrid>
-        </Section>
+            </StoryCard>
 
-        <Section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-        >
-          <SectionTitle>
-            <MapPin size={32} />
-            Banyuls-sur-Mer
-          </SectionTitle>
-          <Grid>
-            <Card
-              whileHover={{ y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CardIcon>
-                <Wine size={32} />
-              </CardIcon>
-              <CardTitle>Terroir d'Exception</CardTitle>
-              <CardText>
-                Banyuls est célèbre pour ses vins doux naturels AOC, produits sur des terrasses 
-                en schiste face à la Méditerranée. Une tradition viticole millénaire unique au monde.
-              </CardText>
-            </Card>
+            <FactsColumn>
+              {facts.map((fact, index) => (
+                <FactCard
+                  key={fact.title}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.08 }}
+                  viewport={{ once: true }}
+                >
+                  {fact.icon}
+                  <h3>{fact.title}</h3>
+                  <p>{fact.text}</p>
+                </FactCard>
+              ))}
+            </FactsColumn>
+          </StoryGrid>
+        </SectionInner>
+      </Section>
 
-            <Card
-              whileHover={{ y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CardIcon>
-                <Camera size={32} />
-              </CardIcon>
-              <CardTitle>Art & Culture</CardTitle>
-              <CardText>
-                Découvrez les œuvres d'Aristide Maillol dans sa ville natale, 
-                visitez ses ateliers et admirez ses sculptures dans les jardins et musées.
-              </CardText>
-            </Card>
+      <Section>
+        <SectionInner>
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            style={{ maxWidth: '42rem', marginBottom: '2rem' }}
+          >
+            <span className="eyebrow">Banyuls</span>
+            <h2 style={{ margin: '1rem 0' }}>Le site parle maintenant du lieu avec plus de justesse.</h2>
+            <p style={{ color: '#665c53', fontSize: '1.125rem' }}>
+              Une residence de luxe a Banyuls doit montrer le territoire, pas seulement
+              des blocs de contenu. Les images, les textes et les activites peuvent
+              desormais rester au niveau de la destination.
+            </p>
+          </motion.div>
 
-            <Card
-              whileHover={{ y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CardIcon>
-                <Fish size={32} />
-              </CardIcon>
-              <CardTitle>Réserve Marine</CardTitle>
-              <CardText>
-                Plongez dans la réserve naturelle marine de Cerbère-Banyuls, 
-                l'une des plus belles de Méditerranée, et découvrez sa biodiversité exceptionnelle.
-              </CardText>
-            </Card>
-
-            <Card
-              whileHover={{ y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CardIcon>
-                <Mountain size={32} />
-              </CardIcon>
-              <CardTitle>Nature Préservée</CardTitle>
-              <CardText>
-                Entre mer et montagne, explorez les sentiers du littoral, 
-                les vignobles en terrasses et les criques sauvages de la Côte Vermeille.
-              </CardText>
-            </Card>
-          </Grid>
-        </Section>
-
-        {/* Section Pourquoi choisir La Grande Voile */}
-        <Section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          viewport={{ once: true }}
-        >
-          <SectionTitle>
-            <Heart size={32} />
-            Pourquoi choisir La Grande Voile ?
-          </SectionTitle>
-            
-          <Grid>
-            <Card
-              whileHover={{ y: -10, scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CardIcon>
-                <MapPin size={32} />
-              </CardIcon>
-              <CardTitle>Emplacement Exceptionnel</CardTitle>
-              <CardText>
-                Idéalement située à Banyuls-sur-Mer, notre résidence vous place au 
-                cœur de la Côte Vermeille, à quelques pas de la plage et du centre-ville.
-              </CardText>
-            </Card>
-
-            <Card
-              whileHover={{ y: -10, scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CardIcon>
-                <Star size={32} />
-              </CardIcon>
-              <CardTitle>Confort 4 Étoiles</CardTitle>
-              <CardText>
-                Appartements haut de gamme entièrement équipés avec terrasses privées, 
-                climatisation, WiFi et toutes les commodités modernes.
-              </CardText>
-            </Card>
-
-            <Card
-              whileHover={{ y: -10, scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CardIcon>
-                <Waves size={32} />
-              </CardIcon>
-              <CardTitle>Accès Privilégié</CardTitle>
-              <CardText>
-                Vue imprenable sur la mer Méditerranée et accès direct aux plages, 
-                sentiers de randonnée et réserve marine de Banyuls.
-              </CardText>
-            </Card>
-
-            <Card
-              whileHover={{ y: -10, scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CardIcon>
-                <Shield size={32} />
-              </CardIcon>
-              <CardTitle>Service Personnalisé</CardTitle>
-              <CardText>
-                Accueil chaleureux et conseils personnalisés pour découvrir les trésors 
-                cachés de Banyuls-sur-Mer et de la région.
-              </CardText>
-            </Card>
-          </Grid>
-        </Section>
-
-        {/* Section Services avec icônes noir et blanc */}
-        <Section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-        >
-          <SectionTitle>
-            <Compass size={32} />
-            Nos Services
-            </SectionTitle>
-            
-            <ServicesGrid>
-              <ServiceCard
-                whileHover={{ y: -10, scale: 1.02 }}
-                transition={{ duration: 0.3 }}
+          <GalleryGrid>
+            {siteContent.banyulsHighlights.map((item, index) => (
+              <GalleryCard
+                key={item.id}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+                viewport={{ once: true }}
               >
-                <ServiceIcon>
-                  <MapPin size={40} color="#2c3e50" />
-                </ServiceIcon>
-                <ServiceTitle>Emplacement Privilégié</ServiceTitle>
-                <ServiceText>
-                  Au cœur de Banyuls-sur-Mer, à proximité immédiate de la plage, 
-                  des restaurants et des sites touristiques.
-                </ServiceText>
-              </ServiceCard>
-
-              <ServiceCard
-                whileHover={{ y: -10, scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ServiceIcon>
-                  <Wine size={40} color="#2c3e50" />
-                </ServiceIcon>
-                <ServiceTitle>Œnotourisme</ServiceTitle>
-                <ServiceText>
-                  Découvrez les célèbres vins de Banyuls avec nos partenaires 
-                  vignerons et dégustations privées.
-                </ServiceText>
-              </ServiceCard>
-
-              <ServiceCard
-                whileHover={{ y: -10, scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ServiceIcon>
-                  <Waves size={40} color="#2c3e50" />
-                </ServiceIcon>
-                <ServiceTitle>Activités Marines</ServiceTitle>
-                <ServiceText>
-                  Plongée sous-marine, snorkeling, kayak et sports nautiques 
-                  dans la réserve marine de Cerbère-Banyuls.
-                </ServiceText>
-              </ServiceCard>
-
-              <ServiceCard
-                whileHover={{ y: -10, scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ServiceIcon>
-                  <Mountain size={40} color="#2c3e50" />
-                </ServiceIcon>
-                <ServiceTitle>Nature & Randonnée</ServiceTitle>
-                <ServiceText>
-                  Sentiers du littoral, GR10, Pyrénées catalanes et 
-                  paysages méditerranéens exceptionnels.
-                </ServiceText>
-              </ServiceCard>
-            </ServicesGrid>
-
-            <TextGrid style={{ marginTop: '3rem' }}>
-              <ImageContent>
-                <img 
-                  src={getPublicImagePath('images/marine/marine-reserve.jpg')} 
-                  alt="Terrasse avec vue mer"
-                />
-              </ImageContent>
-              <TextContent>
-                <CardTitle style={{ textAlign: 'left', marginBottom: '2rem' }}>
-                  <Compass size={24} style={{ display: 'inline', marginRight: '0.5rem' }} />
-                  Votre Séjour Idéal
-                </CardTitle>
-                <p style={{ fontSize: '1.1rem', lineHeight: '1.8', marginBottom: '1.5rem' }}>
-                  <Highlight>Emplacement privilégié :</Highlight> Au cœur de Banyuls, à deux pas 
-                  de la plage, des restaurants et des caves à vin.
-                </p>
-                <p style={{ fontSize: '1.1rem', lineHeight: '1.8', marginBottom: '1.5rem' }}>
-                  <Highlight>Confort moderne :</Highlight> Appartements entièrement équipés, 
-                  climatisation, WiFi, terrasses privées et ascenseur.
-                </p>
-                <p style={{ fontSize: '1.1rem', lineHeight: '1.8', marginBottom: '1.5rem' }}>
-                  <Highlight>Service personnalisé :</Highlight> Accueil chaleureux, 
-                  conseils locaux et assistance durant votre séjour.
-                </p>
-                <p style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-                  <Highlight>Activités variées :</Highlight> Plongée, randonnée, œnotourisme, 
-                  sports nautiques et découvertes culturelles.
-                </p>
-              </TextContent>
-            </TextGrid>
-          </Section>
-      </Content>
-    </Container>
+                <div className="image" style={{ backgroundImage: `url(${item.image})` }} />
+                <div className="body">
+                  <span className="eyebrow">
+                    <MapPin size={12} />
+                    Banyuls-sur-Mer
+                  </span>
+                  <h3 style={{ marginTop: '1rem' }}>{item.title}</h3>
+                  <p>{item.text}</p>
+                </div>
+              </GalleryCard>
+            ))}
+          </GalleryGrid>
+        </SectionInner>
+      </Section>
+    </Page>
   )
 }
 
