@@ -365,7 +365,7 @@ const Reservations = () => {
             )}
 
             <div className="actions">
-              <Link to="/chambres" className="btn btn-outline">
+              <Link to="/rooms" className="btn btn-outline">
                 Voir les chambres
               </Link>
               <button type="submit" className="btn btn-primary">

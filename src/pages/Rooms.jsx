@@ -2,372 +2,455 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import { ArrowRight, Compass, Filter, MapPin, SlidersHorizontal, Users, Waves } from 'lucide-react'
 import { useBooking } from '../context/BookingContext'
-import { Users, Bed, Wifi, Car, Coffee, MapPin, Star, ChevronLeft, ChevronRight } from 'lucide-react'
 import { MarineElements } from '../components/MarineElements'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Navigation, Pagination, Autoplay } from 'swiper/modules'
-import 'swiper/css'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
 
-const RoomsPage = styled.div`
-  padding-top: 100px;
-  min-height: 100vh;
+const PageShell = styled.div`
   position: relative;
   overflow: hidden;
+  padding-top: 7rem;
 `
 
 const Hero = styled.section`
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary.main}, ${props => props.theme.colors.secondary.main});
-  color: ${props => props.theme.colors.neutral.white};
-  padding: ${props => props.theme.spacing[20]} 0 ${props => props.theme.spacing[16]};
-  text-align: center;
+  position: relative;
+  padding: ${({ theme }) => `${theme.spacing[12]} 0 ${theme.spacing[10]}`};
 `
 
-const Container = styled.div`
-  max-width: 1200px;
+const HeroPanel = styled.div`
+  position: relative;
+  width: min(1240px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 0 ${props => props.theme.spacing[4]};
-`
+  padding: ${({ theme }) => theme.spacing[8]};
+  border-radius: ${({ theme }) => theme.radii['3xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background:
+    radial-gradient(circle at 85% 18%, rgba(88, 199, 212, 0.2), transparent 25%),
+    radial-gradient(circle at 10% 20%, rgba(246, 197, 119, 0.14), transparent 18%),
+    rgba(8, 29, 44, 0.86);
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+  overflow: hidden;
 
-const HeroContent = styled(motion.div)`
   h1 {
-    font-size: clamp(2.5rem, 4vw, 3.5rem);
-    margin-bottom: ${props => props.theme.spacing[6]};
-    color: ${props => props.theme.colors.neutral.white};
+    margin: ${({ theme }) => `${theme.spacing[4]} 0 ${theme.spacing[4]}`};
+    max-width: 10ch;
   }
 
   p {
-    font-size: ${props => props.theme.fontSizes.xl};
-    opacity: 0.9;
-    max-width: 600px;
-    margin: 0 auto;
-    color: ${props => props.theme.colors.neutral.white};
+    max-width: 44rem;
+    color: ${({ theme }) => theme.colors.neutral[200]};
+    font-size: ${({ theme }) => theme.fontSizes.lg};
   }
 `
 
-const FilterSection = styled.section`
-  background: ${props => props.theme.colors.neutral.white};
-  padding: ${props => props.theme.spacing[8]} 0;
-  border-bottom: 1px solid ${props => props.theme.colors.neutral[200]};
+const HeroStats = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing[4]};
+  margin-top: ${({ theme }) => theme.spacing[7]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: 1fr;
+  }
 `
 
-const FilterControls = styled.div`
+const HeroStat = styled.div`
+  padding: ${({ theme }) => theme.spacing[5]};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(180, 224, 241, 0.08);
+
+  strong {
+    display: block;
+    margin-bottom: ${({ theme }) => theme.spacing[2]};
+    font-family: ${({ theme }) => theme.fonts.heading};
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    color: ${({ theme }) => theme.colors.neutral.white};
+  }
+
+  span {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+  }
+`
+
+const ControlsSection = styled.section`
+  padding: 0 0 ${({ theme }) => theme.spacing[8]};
+`
+
+const ControlsPanel = styled.div`
+  width: min(1240px, calc(100% - 2rem));
+  margin: 0 auto;
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[5]};
+  padding: ${({ theme }) => theme.spacing[6]};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(8, 29, 44, 0.7);
+  backdrop-filter: blur(20px);
+`
+
+const FilterRow = styled.div`
   display: flex;
-  gap: ${props => props.theme.spacing[4]};
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing[3]};
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+`
+
+const FilterGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[3]};
   flex-wrap: wrap;
 `
 
-const FilterButton = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
-  padding: ${props => props.theme.spacing[3]} ${props => props.theme.spacing[6]};
-  border: 2px solid ${props => props.active ? props.theme.colors.primary.main : props.theme.colors.neutral[300]};
-  background: ${props => props.active ? props.theme.colors.primary.main : props.theme.colors.neutral.white};
-  color: ${props => props.active ? props.theme.colors.neutral.white : props.theme.colors.neutral[700]};
-  border-radius: ${props => props.theme.radii.full};
-  font-weight: ${props => props.theme.fontWeights.medium};
-  cursor: pointer;
-  transition: all ${props => props.theme.transitions.fast};
+const FilterButton = styled.button`
+  min-height: 2.9rem;
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
+  border-radius: ${({ theme }) => theme.radii.full};
+  border: 1px solid ${({ $active }) =>
+    $active ? 'rgba(135, 237, 246, 0.3)' : 'rgba(180, 224, 241, 0.1)'};
+  background: ${({ $active }) =>
+    $active ? 'rgba(99, 211, 223, 0.12)' : 'rgba(255, 255, 255, 0.04)'};
+  color: ${({ theme, $active }) =>
+    $active ? theme.colors.neutral.white : theme.colors.neutral[300]};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
 
   &:hover {
-    border-color: ${props => props.theme.colors.primary.main};
-    background: ${props => !props.active ? props.theme.colors.primary[50] : props.theme.colors.primary.main};
-    color: ${props => !props.active ? props.theme.colors.primary.main : props.theme.colors.neutral.white};
+    transform: translateY(-1px);
   }
 `
 
-const RoomsSection = styled.section`
-  padding: ${props => props.theme.spacing[16]} 0;
+const SortSelect = styled.select`
+  max-width: 18rem;
 `
 
-const RoomsGrid = styled.div`
+const Results = styled.section`
+  padding-bottom: ${({ theme }) => theme.spacing[20]};
+`
+
+const Grid = styled.div`
+  width: min(1240px, calc(100% - 2rem));
+  margin: 0 auto;
   display: grid;
-  gap: ${props => props.theme.spacing[12]};
-`
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing[6]};
 
-const RoomCard = styled(motion.div)`
-  background: ${props => props.theme.colors.neutral.white};
-  border-radius: ${props => props.theme.radii['2xl']};
-  box-shadow: ${props => props.theme.shadows.lg};
-  overflow: hidden;
-  transition: all ${props => props.theme.transitions.normal};
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: ${props => props.theme.shadows.xl};
-  }
-
-  @media (min-width: ${props => props.theme.breakpoints.lg}) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    
-    &:nth-child(even) {
-      .image {
-        order: 2;
-      }
-      
-      .content {
-        order: 1;
-      }
-    }
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
   }
 `
 
-const RoomImage = styled.div`
-  height: 400px;
-  position: relative;
+const RoomCard = styled(motion.article)`
   overflow: hidden;
+  border-radius: ${({ theme }) => theme.radii['3xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(8, 29, 44, 0.86);
+  box-shadow: ${({ theme }) => theme.shadows.base};
 
-  .swiper {
+  .media {
+    position: relative;
+    height: 19rem;
+    overflow: hidden;
+  }
+
+  .media img {
+    width: 100%;
     height: 100%;
+    object-fit: cover;
   }
 
-  .swiper-slide {
-    background-size: cover;
-    background-position: center;
-  }
-
-  .price-badge {
+  .media::after {
+    content: '';
     position: absolute;
-    top: ${props => props.theme.spacing[4]};
-    right: ${props => props.theme.spacing[4]};
-    background: linear-gradient(135deg, ${props => props.theme.colors.accent.gold}, ${props => props.theme.colors.accent.coral});
-    color: ${props => props.theme.colors.neutral.white};
-    padding: ${props => props.theme.spacing[3]} ${props => props.theme.spacing[6]};
-    border-radius: ${props => props.theme.radii.full};
-    font-weight: ${props => props.theme.fontWeights.bold};
-    font-size: ${props => props.theme.fontSizes.lg};
-    z-index: 10;
-    box-shadow: ${props => props.theme.shadows.md};
-  }
-`
-
-const RoomContent = styled.div`
-  padding: ${props => props.theme.spacing[8]};
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 520px;
-
-  h3 {
-    color: ${props => props.theme.colors.neutral[900]};
-    margin-bottom: ${props => props.theme.spacing[4]};
+    inset: 0;
+    background: linear-gradient(180deg, transparent 20%, rgba(4, 16, 28, 0.82) 100%);
   }
 
-  .description {
-    color: ${props => props.theme.colors.neutral[600]};
-    margin-bottom: ${props => props.theme.spacing[6]};
-    line-height: 1.6;
-    flex-grow: 1;
-  }
-
-  .details {
+  .badge-row {
+    position: absolute;
+    inset: 1rem 1rem auto 1rem;
+    z-index: 1;
     display: flex;
-    gap: ${props => props.theme.spacing[6]};
-    margin-bottom: ${props => props.theme.spacing[6]};
+    justify-content: space-between;
+    gap: ${({ theme }) => theme.spacing[3]};
     flex-wrap: wrap;
+  }
 
-    .detail {
-      display: flex;
-      align-items: center;
-      gap: ${props => props.theme.spacing[2]};
-      color: ${props => props.theme.colors.neutral[600]};
-      font-size: ${props => props.theme.fontSizes.sm};
+  .badge {
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(8, 29, 44, 0.72);
+    color: ${({ theme }) => theme.colors.neutral.white};
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
 
-      svg {
-        color: ${props => props.theme.colors.primary.main};
-      }
-    }
+  .body {
+    padding: ${({ theme }) => theme.spacing[6]};
+  }
+
+  h2 {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    margin-bottom: ${({ theme }) => theme.spacing[3]};
+  }
+
+  p {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    margin-bottom: ${({ theme }) => theme.spacing[4]};
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: ${({ theme }) => theme.spacing[2]};
+    margin-bottom: ${({ theme }) => theme.spacing[4]};
+  }
+
+  .meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    color: ${({ theme }) => theme.colors.neutral[200]};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
   }
 
   .amenities {
-    margin-bottom: ${props => props.theme.spacing[6]};
+    display: flex;
+    flex-wrap: wrap;
+    gap: ${({ theme }) => theme.spacing[2]};
+    margin-bottom: ${({ theme }) => theme.spacing[5]};
+  }
 
-    h4 {
-      color: ${props => props.theme.colors.neutral[800]};
-      margin-bottom: ${props => props.theme.spacing[3]};
-      font-size: ${props => props.theme.fontSizes.base};
-    }
-
-    .amenities-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: ${props => props.theme.spacing[2]};
-
-      .amenity {
-        background: ${props => props.theme.colors.primary[50]};
-        color: ${props => props.theme.colors.primary.main};
-        padding: ${props => props.theme.spacing[1]} ${props => props.theme.spacing[3]};
-        border-radius: ${props => props.theme.radii.full};
-        font-size: ${props => props.theme.fontSizes.sm};
-        font-weight: ${props => props.theme.fontWeights.medium};
-      }
-    }
+  .amenities span {
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(99, 211, 223, 0.08);
+    color: ${({ theme }) => theme.colors.secondary.light};
+    font-size: 0.78rem;
   }
 
   .actions {
     display: flex;
-    gap: ${props => props.theme.spacing[3]};
-
-    .btn {
-      flex: 1;
-      justify-content: center;
-      padding: ${props => props.theme.spacing[3]} ${props => props.theme.spacing[6]};
-    }
+    flex-wrap: wrap;
+    gap: ${({ theme }) => theme.spacing[3]};
   }
 `
 
+const EmptyState = styled.div`
+  width: min(720px, calc(100% - 2rem));
+  margin: 0 auto;
+  text-align: center;
+  padding: ${({ theme }) => theme.spacing[8]};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(8, 29, 44, 0.76);
+
+  p {
+    margin: ${({ theme }) => `${theme.spacing[3]} 0 ${theme.spacing[5]}`};
+    color: ${({ theme }) => theme.colors.neutral[300]};
+  }
+`
+
+const filters = [
+  { key: 'all', label: 'Tous' },
+  { key: 'available', label: 'Disponibles' },
+  { key: 'panorama', label: 'Vue mer' },
+  { key: 'outdoor', label: 'Terrasse ou patio' },
+  { key: 'family', label: 'Famille & groupes' },
+  { key: 'couple', label: 'Escapade duo' },
+]
+
+const sorters = {
+  featured: (a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)),
+  capacity: (a, b) => b.capacity - a.capacity,
+  priceAsc: (a, b) => a.price.lowSeason - b.price.lowSeason,
+  priceDesc: (a, b) => b.price.highSeason - a.price.highSeason,
+}
+
+const hasSeaView = (room) =>
+  room.amenities.some((amenity) => amenity.toLowerCase().includes('vue'))
+
+const hasOutdoorSpace = (room) =>
+  room.amenities.some((amenity) =>
+    ['terrasse', 'patio', 'balcon'].some((keyword) => amenity.toLowerCase().includes(keyword))
+  )
+
 const Rooms = () => {
   const { rooms } = useBooking()
-  const [filter, setFilter] = useState('all')
+  const [activeFilter, setActiveFilter] = useState('all')
+  const [sortBy, setSortBy] = useState('featured')
 
-  const filters = [
-    { key: 'all', label: 'Toutes les chambres' },
-    { key: 'vue-mer', label: 'Vue mer' },
-    { key: 'suite', label: 'Suites' },
-    { key: 'famille', label: 'Familiales' },
-  ]
+  const filteredRooms = rooms
+    .filter((room) => {
+      if (activeFilter === 'all') return true
+      if (activeFilter === 'available') return room.available
+      if (activeFilter === 'panorama') return hasSeaView(room)
+      if (activeFilter === 'outdoor') return hasOutdoorSpace(room)
+      if (activeFilter === 'family') return room.capacity >= 6
+      if (activeFilter === 'couple') return room.capacity <= 2
+      return true
+    })
+    .sort(sorters[sortBy] || sorters.featured)
 
-  const filteredRooms = rooms.filter(room => {
-    if (filter === 'all') return true
-    if (filter === 'vue-mer') return room.amenities.some(amenity => amenity.toLowerCase().includes('vue mer'))
-    if (filter === 'suite') return room.name.toLowerCase().includes('suite')
-    if (filter === 'famille') return room.capacity >= 4
-    return true
-  })
+  const availableCount = rooms.filter((room) => room.available).length
+  const panoramicCount = rooms.filter(hasSeaView).length
+  const startingPrice = rooms.length
+    ? Math.min(...rooms.map((room) => room.price.lowSeason))
+    : 0
 
   return (
-    <RoomsPage>
-      <MarineElements density="light" />
+    <PageShell>
+      <MarineElements density="normal" divingTheme />
+
       <Hero>
-        <Container>
-          <HeroContent
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h1>Nos Chambres & Suites</h1>
-            <p>
-              Découvrez nos hébergements d'exception avec vue sur la Méditerranée 
-              et les vignobles de Banyuls-sur-Mer
-            </p>
-          </HeroContent>
-        </Container>
+        <HeroPanel>
+          <span className="eyebrow">Collection oceanique</span>
+          <h1>Choisir l appartement qui colle vraiment a votre rythme de sejour.</h1>
+          <p>
+            Nous avons revu l affichage pour faciliter la comparaison : disponibilité,
+            vue, extérieurs, capacité et niveau de prix sont plus lisibles dès le premier regard.
+          </p>
+
+          <HeroStats>
+            <HeroStat>
+              <strong>{rooms.length}</strong>
+              <span>configurations a visiter</span>
+            </HeroStat>
+            <HeroStat>
+              <strong>{availableCount}</strong>
+              <span>appartements actuellement disponibles</span>
+            </HeroStat>
+            <HeroStat>
+              <strong>{startingPrice}€</strong>
+              <span>premier prix basse saison</span>
+            </HeroStat>
+          </HeroStats>
+        </HeroPanel>
       </Hero>
 
-      <FilterSection>
-        <Container>
-          <FilterControls>
-            {filters.map(filterOption => (
-              <FilterButton
-                key={filterOption.key}
-                active={filter === filterOption.key}
-                onClick={() => setFilter(filterOption.key)}
-              >
-                {filterOption.label}
-              </FilterButton>
-            ))}
-          </FilterControls>
-        </Container>
-      </FilterSection>
+      <ControlsSection>
+        <ControlsPanel>
+          <FilterRow>
+            <FilterGroup>
+              <span className="eyebrow">
+                <Filter size={12} />
+                Filtres
+              </span>
+              {filters.map((filter) => (
+                <FilterButton
+                  key={filter.key}
+                  $active={activeFilter === filter.key}
+                  onClick={() => setActiveFilter(filter.key)}
+                >
+                  {filter.label}
+                </FilterButton>
+              ))}
+            </FilterGroup>
 
-      <RoomsSection>
-        <Container>
-          <RoomsGrid>
+            <FilterGroup>
+              <span className="eyebrow">
+                <SlidersHorizontal size={12} />
+                Trier
+              </span>
+              <SortSelect value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                <option value="featured">Mettre en avant les signatures</option>
+                <option value="capacity">Du plus grand au plus intime</option>
+                <option value="priceAsc">Du plus accessible au plus premium</option>
+                <option value="priceDesc">Du plus premium au plus accessible</option>
+              </SortSelect>
+            </FilterGroup>
+          </FilterRow>
+
+          <FilterRow>
+            <FilterGroup>
+              <span style={{ color: '#d3e0ea', fontSize: '0.92rem' }}>
+                {filteredRooms.length} resultat{filteredRooms.length > 1 ? 's' : ''} · {panoramicCount} avec vue mer
+              </span>
+            </FilterGroup>
+          </FilterRow>
+        </ControlsPanel>
+      </ControlsSection>
+
+      <Results>
+        {filteredRooms.length > 0 ? (
+          <Grid>
             {filteredRooms.map((room, index) => (
               <RoomCard
                 key={room.id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                transition={{ duration: 0.45, delay: index * 0.05 }}
               >
-                <RoomImage className="image">
-                  <Swiper
-                    modules={[Navigation, Pagination, Autoplay]}
-                    navigation
-                    pagination={{ clickable: true }}
-                    autoplay={{ delay: 4000, disableOnInteraction: false }}
-                    loop={true}
-                    style={{ height: '100%' }}
-                  >
-                    {room.images.map((image, imgIndex) => (
-                      <SwiperSlide key={imgIndex}>
-                        <div 
-                          style={{
-                            height: '100%',
-                            backgroundImage: `url(${image})`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                          }}
-                        />
-                      </SwiperSlide>
-                    ))}
-                  </Swiper>
-                  <div className="price-badge">
-                    €{room.price.lowSeason}/sem
+                <div className="media">
+                  <img src={room.images[0]} alt={room.name} />
+                  <div className="badge-row">
+                    <span className="badge">{room.type}</span>
+                    <span className="badge">{room.available ? 'Disponible' : 'Indisponible'}</span>
                   </div>
-                </RoomImage>
-                
-                <RoomContent className="content">
-                  <div>
-                    <h3>{room.name}</h3>
-                    <p className="description">{room.description}</p>
-                    
-                    <div className="details">
-                      <div className="detail">
-                        <Users size={16} />
-                        {room.capacity} {room.capacity > 1 ? 'personnes' : 'personne'}
-                      </div>
-                      <div className="detail">
-                        <Bed size={16} />
-                        {room.size}m²
-                      </div>
-                    </div>
+                </div>
 
-                    <div className="amenities">
-                      <h4>Équipements</h4>
-                      <div className="amenities-list">
-                        {room.amenities.slice(0, 6).map((amenity, idx) => (
-                          <span key={idx} className="amenity">{amenity}</span>
-                        ))}
-                        {room.amenities.length > 6 && (
-                          <span className="amenity">+{room.amenities.length - 6} autres</span>
-                        )}
-                      </div>
-                    </div>
+                <div className="body">
+                  <h2>{room.name}</h2>
+                  <div className="meta">
+                    <span>
+                      <Users size={14} />
+                      {room.capacity} voyageurs
+                    </span>
+                    <span>
+                      <MapPin size={14} />
+                      {room.size}
+                    </span>
+                    <span>
+                      <Compass size={14} />
+                      dès {room.price.lowSeason}€/semaine
+                    </span>
+                  </div>
+
+                  <p>{room.description}</p>
+
+                  <div className="amenities">
+                    {room.amenities.slice(0, 5).map((amenity) => (
+                      <span key={amenity}>{amenity}</span>
+                    ))}
                   </div>
 
                   <div className="actions">
-                    <Link to={`/chambres/${room.id}`} className="btn btn-outline">
-                      Voir détails
+                    <Link to={`/rooms/${room.id}`} className="btn btn-secondary">
+                      Detail complet
                     </Link>
-                    <Link to={`/reservation?room=${room.id}`} className="btn btn-primary">
-                      Réserver
+                    <Link to={`/booking/${room.id}`} className="btn btn-primary">
+                      Reserver cet appartement
                     </Link>
                   </div>
-                </RoomContent>
+                </div>
               </RoomCard>
             ))}
-          </RoomsGrid>
-
-          {filteredRooms.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '4rem 0' }}>
-              <h3>Aucune chambre ne correspond à vos critères</h3>
-              <p style={{ marginTop: '1rem', marginBottom: '2rem' }}>
-                Essayez de modifier vos filtres ou contactez-nous pour plus d'options.
-              </p>
-              <Link to="/contact" className="btn btn-primary">
-                Nous contacter
-              </Link>
-            </div>
-          )}
-        </Container>
-      </RoomsSection>
-    </RoomsPage>
+          </Grid>
+        ) : (
+          <EmptyState>
+            <span className="eyebrow">
+              <Waves size={12} />
+              Aucun match
+            </span>
+            <p>
+              Aucun appartement ne correspond a ce filtre pour l instant. Vous pouvez
+              revenir sur "Tous", regarder les disponibilités ou nous contacter.
+            </p>
+            <Link to="/contact" className="btn btn-primary">
+              Nous contacter
+              <ArrowRight size={16} />
+            </Link>
+          </EmptyState>
+        )}
+      </Results>
+    </PageShell>
   )
 }
 

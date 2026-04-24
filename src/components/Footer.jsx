@@ -2,371 +2,367 @@ import React from 'react'
 import styled from 'styled-components'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, Heart } from 'lucide-react'
+import { Facebook, Instagram, Mail, MapPin, Phone, Waves } from 'lucide-react'
+import { useBooking } from '../context/BookingContext'
 
-const FooterContainer = styled.footer`
-  background: linear-gradient(135deg, ${props => props.theme.colors.neutral[900]}, ${props => props.theme.colors.primary.main});
-  color: ${props => props.theme.colors.neutral.white};
-  padding: ${props => props.theme.spacing[16]} 0 ${props => props.theme.spacing[8]};
-  margin-top: ${props => props.theme.spacing[20]};
+const FooterShell = styled.footer`
   position: relative;
+  margin-top: ${({ theme }) => theme.spacing[20]};
   overflow: hidden;
+  border-top: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background:
+    radial-gradient(circle at top left, rgba(88, 199, 212, 0.16), transparent 30%),
+    linear-gradient(180deg, rgba(6, 24, 38, 0.92) 0%, rgba(4, 16, 28, 0.98) 100%);
+`
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, ${props => props.theme.colors.accent.gold}, transparent);
-  }
+const FooterGlow = styled.div`
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(135, 237, 246, 0.12), transparent 20%),
+    radial-gradient(circle at 80% 0%, rgba(246, 197, 119, 0.12), transparent 18%);
 `
 
 const FooterContent = styled.div`
-  max-width: 1200px;
+  position: relative;
+  z-index: 1;
+  width: min(1240px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 0 ${props => props.theme.spacing[4]};
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: ${props => props.theme.spacing[12]};
+  padding: ${({ theme }) => `${theme.spacing[20]} 0 ${theme.spacing[8]}`};
 `
 
-const FooterSection = styled(motion.div)`
-  h3 {
-    color: ${props => props.theme.colors.neutral.white};
-    font-size: ${props => props.theme.fontSizes.xl};
-    margin-bottom: ${props => props.theme.spacing[6]};
-    position: relative;
+const CTA = styled(motion.div)`
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: ${({ theme }) => theme.spacing[6]};
+  padding: ${({ theme }) => theme.spacing[8]};
+  border-radius: ${({ theme }) => theme.radii['3xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: ${({ theme }) => theme.colors.gradients.cta};
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+  margin-bottom: ${({ theme }) => theme.spacing[12]};
 
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -8px;
-      left: 0;
-      width: 40px;
-      height: 2px;
-      background: linear-gradient(90deg, ${props => props.theme.colors.accent.gold}, ${props => props.theme.colors.accent.coral});
-    }
+  h2 {
+    margin-bottom: ${({ theme }) => theme.spacing[3]};
   }
 
-  p, li {
-    color: ${props => props.theme.colors.neutral[300]};
-    line-height: 1.6;
-    margin-bottom: ${props => props.theme.spacing[3]};
+  p {
+    max-width: 40rem;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: ${({ theme }) => theme.spacing[3]};
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: 1fr;
+    padding: ${({ theme }) => theme.spacing[6]};
+
+    .actions {
+      justify-content: flex-start;
+    }
+  }
+`
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 1fr 0.8fr;
+  gap: ${({ theme }) => theme.spacing[8]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const Column = styled(motion.div)`
+  h3 {
+    font-size: ${({ theme }) => theme.fontSizes['2xl']};
+    margin-bottom: ${({ theme }) => theme.spacing[4]};
+  }
+
+  p,
+  li,
+  a,
+  button {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    line-height: 1.8;
+    font-size: ${({ theme }) => theme.fontSizes.sm};
   }
 
   ul {
     list-style: none;
-  }
-
-  a {
-    color: ${props => props.theme.colors.neutral[300]};
-    text-decoration: none;
-    transition: color ${props => props.theme.transitions.fast};
-
-    &:hover {
-      color: ${props => props.theme.colors.accent.gold};
-    }
+    display: grid;
+    gap: ${({ theme }) => theme.spacing[2]};
   }
 `
 
-const ContactInfo = styled.div`
-  display: flex;
+const Brand = styled.div`
+  display: inline-flex;
   align-items: center;
-  gap: ${props => props.theme.spacing[3]};
-  margin-bottom: ${props => props.theme.spacing[4]};
+  gap: ${({ theme }) => theme.spacing[3]};
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+
+  .mark {
+    width: 3rem;
+    height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    background: ${({ theme }) => theme.colors.gradients.button};
+    box-shadow: ${({ theme }) => theme.shadows.glow};
+    color: ${({ theme }) => theme.colors.neutral.white};
+  }
+
+  strong {
+    display: block;
+    font-family: ${({ theme }) => theme.fonts.heading};
+    font-size: 2rem;
+    color: ${({ theme }) => theme.colors.neutral.white};
+    line-height: 1;
+  }
+
+  span {
+    color: ${({ theme }) => theme.colors.neutral[400]};
+    font-size: ${({ theme }) => theme.fontSizes.xs};
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+`
+
+const ContactCard = styled.div`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[3]};
+`
+
+const ContactItem = styled.a`
+  display: inline-flex;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.spacing[3]};
+  color: ${({ theme }) => theme.colors.neutral[300]};
 
   svg {
-    color: ${props => props.theme.colors.accent.gold};
+    color: ${({ theme }) => theme.colors.secondary.light};
+    margin-top: 0.15rem;
     flex-shrink: 0;
   }
 `
 
-const SocialLinks = styled.div`
-  display: flex;
-  gap: ${props => props.theme.spacing[4]};
-  margin-top: ${props => props.theme.spacing[6]};
-`
-
-const SocialLink = styled(motion.a)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: ${props => props.theme.radii.lg};
-  color: ${props => props.theme.colors.neutral.white};
-  transition: all ${props => props.theme.transitions.fast};
+const NavLink = styled(Link)`
+  color: ${({ theme }) => theme.colors.neutral[300]};
 
   &:hover {
-    background: ${props => props.theme.colors.accent.gold};
-    transform: translateY(-2px);
+    color: ${({ theme }) => theme.colors.neutral.white};
   }
 `
 
-const Newsletter = styled.div`
-  margin-top: ${props => props.theme.spacing[6]};
-`
-
-const NewsletterForm = styled.form`
+const Socials = styled.div`
   display: flex;
-  gap: ${props => props.theme.spacing[2]};
-  margin-top: ${props => props.theme.spacing[4]};
+  gap: ${({ theme }) => theme.spacing[3]};
+  margin-top: ${({ theme }) => theme.spacing[5]};
+`
 
-  input {
-    flex: 1;
-    padding: ${props => props.theme.spacing[3]} ${props => props.theme.spacing[4]};
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: ${props => props.theme.radii.lg};
+const Social = styled(motion.a)`
+  width: 2.75rem;
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(255, 255, 255, 0.05);
+  color: ${({ theme }) => theme.colors.neutral.white};
+
+  &:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: ${props => props.theme.colors.neutral.white};
-    
-    &::placeholder {
-      color: ${props => props.theme.colors.neutral[400]};
-    }
-
-    &:focus {
-      border-color: ${props => props.theme.colors.accent.gold};
-      background: rgba(255, 255, 255, 0.15);
-    }
-  }
-
-  button {
-    padding: ${props => props.theme.spacing[3]} ${props => props.theme.spacing[6]};
-    background: linear-gradient(135deg, ${props => props.theme.colors.accent.gold}, ${props => props.theme.colors.accent.coral});
-    color: ${props => props.theme.colors.neutral.white};
-    border: none;
-    border-radius: ${props => props.theme.radii.lg};
-    font-weight: ${props => props.theme.fontWeights.semibold};
-    cursor: pointer;
-    transition: transform ${props => props.theme.transitions.fast};
-
-    &:hover {
-      transform: translateY(-2px);
-    }
-  }
-
-  @media (max-width: ${props => props.theme.breakpoints.sm}) {
-    flex-direction: column;
   }
 `
 
 const FooterBottom = styled.div`
-  margin-top: ${props => props.theme.spacing[12]};
-  padding-top: ${props => props.theme.spacing[8]};
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: center;
-  color: ${props => props.theme.colors.neutral[400]};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: ${props => props.theme.spacing[4]};
-
-  @media (min-width: ${props => props.theme.breakpoints.md}) {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-`
-
-const FooterLinks = styled.div`
-  display: flex;
-  gap: ${props => props.theme.spacing[6]};
-  flex-wrap: wrap;
-  justify-content: center;
-
-  a {
-    color: ${props => props.theme.colors.neutral[400]};
-    text-decoration: none;
-    font-size: ${props => props.theme.fontSizes.sm};
-    transition: color ${props => props.theme.transitions.fast};
-
-    &:hover {
-      color: ${props => props.theme.colors.accent.gold};
-    }
-  }
-`
-
-const MadeWithLove = styled.div`
   display: flex;
   align-items: center;
-  gap: ${props => props.theme.spacing[1]};
-  font-size: ${props => props.theme.fontSizes.sm};
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing[4]};
+  margin-top: ${({ theme }) => theme.spacing[10]};
+  padding-top: ${({ theme }) => theme.spacing[6]};
+  border-top: 1px solid rgba(180, 224, 241, 0.08);
 
-  .heart {
-    color: ${props => props.theme.colors.accent.coral};
-    animation: heartbeat 1.5s ease-in-out infinite;
+  p,
+  span {
+    color: ${({ theme }) => theme.colors.neutral[400]};
+    font-size: ${({ theme }) => theme.fontSizes.xs};
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  @keyframes heartbeat {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.1);
-    }
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    flex-direction: column;
+    align-items: flex-start;
   }
 `
+
+const footerLinks = [
+  { path: '/', label: 'Accueil' },
+  { path: '/rooms', label: 'Appartements' },
+  { path: '/reservation', label: 'Reservation' },
+  { path: '/calendrier', label: 'Disponibilites' },
+  { path: '/a-propos', label: 'A propos' },
+  { path: '/contact', label: 'Contact' },
+]
+
+const highlights = [
+  'Vue directe sur la baie de Banyuls',
+  'Terrasses, patio et appartements familiaux',
+  'Acces rapide aux spots de plongee et a la reserve marine',
+  'Semaine en couple, en famille ou entre amis',
+]
 
 const Footer = () => {
-  const handleNewsletterSubmit = (e) => {
-    e.preventDefault()
-    // Handle newsletter subscription
-    console.log('Newsletter subscription')
-  }
+  const { hotelSettings } = useBooking()
+  const year = new Date().getFullYear()
 
   return (
-    <FooterContainer>
+    <FooterShell>
+      <FooterGlow />
       <FooterContent>
-        <FooterSection
-          initial={{ opacity: 0, y: 20 }}
+        <CTA
+          initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.7 }}
           viewport={{ once: true }}
         >
-          <h3>La Grande Voile</h3>
-          <p>
-            Découvrez l'authenticité méditerranéenne dans notre hôtel de charme à Banyuls-sur-Mer. 
-            Entre mer et vignobles, vivez une expérience unique sur la Côte Vermeille.
-          </p>
-          
-          <Newsletter>
-            <h4 style={{ color: 'white', marginBottom: '1rem' }}>Newsletter</h4>
-            <p style={{ fontSize: '0.9rem' }}>
-              Recevez nos offres spéciales et actualités
+          <div>
+            <span className="eyebrow">Ocean Stay</span>
+            <h2>Un sejour plus immersif, plus fluide, plus memoriel.</h2>
+            <p>
+              Entre lumiere mediterraneenne, reserve marine et appartements de caractere,
+              La Grande Voile vous installe au plus proche de la mer avec une experience
+              elegante et sans friction.
             </p>
-            <NewsletterForm onSubmit={handleNewsletterSubmit}>
-              <input 
-                type="email" 
-                placeholder="Votre email"
-                required
-              />
-              <button type="submit">S'abonner</button>
-            </NewsletterForm>
-          </Newsletter>
-        </FooterSection>
-
-        <FooterSection
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          viewport={{ once: true }}
-        >
-          <h3>Navigation</h3>
-          <ul>
-            <li><Link to="/">Accueil</Link></li>
-            <li><Link to="/chambres">Nos Chambres</Link></li>
-            <li><Link to="/calendrier">Disponibilités</Link></li>
-            <li><Link to="/a-propos">À propos</Link></li>
-            <li><Link to="/contact">Contact</Link></li>
-            <li><Link to="/reservation">Réserver</Link></li>
-          </ul>
-
-          <div style={{ marginTop: '2rem' }}>
-            <h4 style={{ color: 'white', marginBottom: '1rem' }}>Services</h4>
-            <ul>
-              <li>Petit-déjeuner continental</li>
-              <li>Concierge</li>
-              <li>Parking privé</li>
-              <li>Wi-Fi gratuit</li>
-              <li>Animaux acceptés</li>
-            </ul>
           </div>
-        </FooterSection>
-
-        <FooterSection
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-        >
-          <h3>Contact</h3>
-          
-          <ContactInfo>
-            <MapPin size={20} />
-            <div>
-              <p>12 Avenue de la Méditerranée</p>
-              <p>66650 Banyuls-sur-Mer, France</p>
-            </div>
-          </ContactInfo>
-
-          <ContactInfo>
-            <Phone size={20} />
-            <div>
-              <p>+33 4 68 88 12 34</p>
-            </div>
-          </ContactInfo>
-
-          <ContactInfo>
-            <Mail size={20} />
-            <div>
-              <p>contact@lagrandevoile.com</p>
-            </div>
-          </ContactInfo>
-
-          <div style={{ marginTop: '2rem' }}>
-            <h4 style={{ color: 'white', marginBottom: '1rem' }}>Découvrir Banyuls</h4>
-            <ul>
-              <li>Musée Maillol</li>
-              <li>Caves viticoles</li>
-              <li>Sentier sous-marin</li>
-              <li>Tour Madeloc</li>
-              <li>Port de plaisance</li>
-            </ul>
+          <div className="actions">
+            <Link to="/rooms" className="btn btn-secondary">
+              Voir les appartements
+            </Link>
+            <Link to="/reservation" className="btn btn-accent">
+              Reserver maintenant
+            </Link>
           </div>
+        </CTA>
 
-          <SocialLinks>
-            <SocialLink
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Facebook size={20} />
-            </SocialLink>
-            <SocialLink
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Instagram size={20} />
-            </SocialLink>
-            <SocialLink
-              href="https://youtube.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Youtube size={20} />
-            </SocialLink>
-          </SocialLinks>
-        </FooterSection>
+        <Grid>
+          <Column
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55 }}
+            viewport={{ once: true }}
+          >
+            <Brand>
+              <span className="mark">
+                <Waves size={18} />
+              </span>
+              <div>
+                <strong>La Grande Voile</strong>
+                <span>Residence de standing a Banyuls-sur-Mer</span>
+              </div>
+            </Brand>
+            <p>
+              Residence face a la baie, pensee pour profiter de la plongee, de la cote
+              Vermeille et d'un rythme de vacances vraiment apaisant.
+            </p>
+            <Socials>
+              <Social
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ y: -3 }}
+              >
+                <Facebook size={16} />
+              </Social>
+              <Social
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ y: -3 }}
+              >
+                <Instagram size={16} />
+              </Social>
+              <Social href={`mailto:${hotelSettings.email}`} whileHover={{ y: -3 }}>
+                <Mail size={16} />
+              </Social>
+            </Socials>
+          </Column>
+
+          <Column
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.08 }}
+            viewport={{ once: true }}
+          >
+            <h3>Naviguer</h3>
+            <ul>
+              {footerLinks.map((item) => (
+                <li key={item.path}>
+                  <NavLink to={item.path}>{item.label}</NavLink>
+                </li>
+              ))}
+            </ul>
+          </Column>
+
+          <Column
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.16 }}
+            viewport={{ once: true }}
+          >
+            <h3>Signature</h3>
+            <ul>
+              {highlights.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </Column>
+
+          <Column
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.24 }}
+            viewport={{ once: true }}
+          >
+            <h3>Contact</h3>
+            <ContactCard>
+              <ContactItem href={`https://maps.google.com/?q=${encodeURIComponent(hotelSettings.address)}`}>
+                <MapPin size={16} />
+                <span>{hotelSettings.address}</span>
+              </ContactItem>
+              <ContactItem href={`tel:${hotelSettings.phone.replace(/\s+/g, '')}`}>
+                <Phone size={16} />
+                <span>{hotelSettings.phone}</span>
+              </ContactItem>
+              <ContactItem href={`mailto:${hotelSettings.email}`}>
+                <Mail size={16} />
+                <span>{hotelSettings.email}</span>
+              </ContactItem>
+            </ContactCard>
+          </Column>
+        </Grid>
+
+        <FooterBottom>
+          <p>{year} La Grande Voile. Tous droits reserves.</p>
+          <span>Theme mer & plongee, transitions fluides et navigation coherente</span>
+        </FooterBottom>
       </FooterContent>
-
-      <FooterBottom>
-        <FooterLinks>
-          <Link to="/mentions-legales">Mentions légales</Link>
-          <Link to="/politique-confidentialite">Politique de confidentialité</Link>
-          <Link to="/conditions-generales">Conditions générales</Link>
-          <Link to="/cookies">Politique des cookies</Link>
-        </FooterLinks>
-
-        <div>
-          <p>&copy; 2025 La Grande Voile. Tous droits réservés.</p>
-        </div>
-
-        <MadeWithLove>
-          <span>Fait avec</span>
-          <Heart size={16} className="heart" />
-          <span>à Banyuls-sur-Mer</span>
-        </MadeWithLove>
-      </FooterBottom>
-    </FooterContainer>
+    </FooterShell>
   )
 }
 

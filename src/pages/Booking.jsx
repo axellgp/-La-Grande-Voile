@@ -253,13 +253,14 @@ const Booking = () => {
   const { rooms, createBookingRequest, getRoomPrice, getCurrentSeason, isRoomAvailable } = useBooking()
   const { user } = useAuth()
   const { addLog } = useLogs()
+  const userDisplayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ')
   
   const [room, setRoom] = useState(null)
   const [formData, setFormData] = useState({
     checkIn: '',
     checkOut: '',
     guests: 2,
-    guestName: user?.name || '',
+    guestName: userDisplayName || '',
     email: user?.email || '',
     phone: '',
     requests: ''
@@ -384,7 +385,7 @@ const Booking = () => {
         checkIn: '',
         checkOut: '',
         guests: 2,
-        guestName: user?.name || '',
+        guestName: userDisplayName || '',
         email: user?.email || '',
         phone: '',
         requests: ''
@@ -490,12 +491,12 @@ const Booking = () => {
                       <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem', color: '#666' }}>
                         <span>👥 {apartment.capacity} personnes</span>
                         <span>📐 {apartment.size} m²</span>
-                        <span>🏠 {apartment.bedrooms} chambres</span>
+                        <span>🏠 {apartment.type}</span>
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: '1.2rem', fontWeight: '600', color: '#2c5aa0' }}>
-                        À partir de {Math.min(apartment.price.lowSeason, apartment.price.midSeason, apartment.price.highSeason)}€/nuit
+                        À partir de {Math.min(apartment.price.lowSeason, apartment.price.midSeason, apartment.price.highSeason)}€/semaine
                       </div>
                     </div>
                   </div>

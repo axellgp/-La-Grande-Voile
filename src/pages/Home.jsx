@@ -1,1135 +1,835 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Calendar, MapPin, Star, Users, Wifi, Car, Coffee, Heart, ChevronRight, Phone, Waves, Mountain, Grape, Compass, Sailboat, Camera } from 'lucide-react'
-import { useInView } from 'react-intersection-observer'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules'
-import { getPublicImagePath } from '../utils/imageUtils'
-
+import {
+  Calendar,
+  ChevronRight,
+  Compass,
+  Fish,
+  MapPin,
+  Phone,
+  Sailboat,
+  Shield,
+  Star,
+  Users,
+  Waves,
+} from 'lucide-react'
 import { useBooking } from '../context/BookingContext'
 import { heroImages } from '../assets/images'
-import 'swiper/css'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
-import 'swiper/css/effect-fade'
+import { getPublicImagePath } from '../utils/imageUtils'
+import { MarineElements } from '../components/MarineElements'
 
-const HomePage = styled.div`
-  min-height: 100vh;
-  overflow-x: hidden;
-`
-
-const HeroSection = styled.section`
+const HomeShell = styled.div`
   position: relative;
-  height: 120vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
-
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
-    height: 100vh;
-  }
 `
 
-const HeroBackground = styled.div`
+const Hero = styled.section`
+  position: relative;
+  min-height: 100vh;
+  padding: clamp(7rem, 12vw, 9rem) 0 ${({ theme }) => theme.spacing[16]};
+  overflow: hidden;
+`
+
+const HeroBackdrop = styled.div`
   position: absolute;
   inset: 0;
-  z-index: -2;
-  
-  .swiper {
-    height: 100%;
-    width: 100%;
-  }
-
-  .swiper-slide {
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-
-  .swiper-pagination-bullet {
-    background: rgba(255, 255, 255, 0.7);
-    width: 12px;
-    height: 12px;
-  }
-
-  .swiper-pagination-bullet-active {
-    background: ${props => props.theme.colors.accent.gold};
-  }
+  background:
+    ${({ theme }) => theme.colors.gradients.hero},
+    url('${heroImages[0]}') center/cover no-repeat;
 `
 
-const HeroOverlay = styled.div`
+const HeroSurface = styled.div`
   position: absolute;
   inset: 0;
-  z-index: -1;
-  background: linear-gradient(
-    135deg,
-    rgba(30, 58, 138, 0.7) 0%,
-    rgba(14, 165, 233, 0.5) 50%,
-    rgba(245, 158, 11, 0.6) 100%
-  );
+  background:
+    radial-gradient(circle at 20% 20%, rgba(135, 237, 246, 0.22), transparent 28%),
+    radial-gradient(circle at 80% 18%, rgba(246, 197, 119, 0.18), transparent 20%),
+    linear-gradient(180deg, rgba(6, 24, 38, 0.2), rgba(6, 24, 38, 0.78));
 `
 
-const HeroContent = styled(motion.div)`
-  text-align: center;
-  color: ${props => props.theme.colors.neutral.white};
-  max-width: 800px;
-  padding: 0 ${props => props.theme.spacing[4]};
+const HeroInner = styled.div`
+  position: relative;
   z-index: 1;
+  width: min(1320px, calc(100% - 2rem));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: ${({ theme }) => theme.spacing[10]};
+  align-items: center;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const HeroCopy = styled(motion.div)`
+  max-width: 42rem;
 
   h1 {
-    font-size: clamp(2.5rem, 5vw, 4rem);
-    font-weight: ${props => props.theme.fontWeights.bold};
-    margin-bottom: ${props => props.theme.spacing[6]};
-    color: ${props => props.theme.colors.neutral.white};
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    line-height: 1.1;
+    margin: ${({ theme }) => `${theme.spacing[5]} 0 ${theme.spacing[5]}`};
+    max-width: 12ch;
   }
 
-  .subtitle {
-    font-size: clamp(1.1rem, 2vw, 1.5rem);
-    margin-bottom: ${props => props.theme.spacing[8]};
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-    line-height: 1.4;
-  }
-
-  .hero-buttons {
-    display: flex;
-    gap: ${props => props.theme.spacing[4]};
-    justify-content: center;
-    flex-wrap: wrap;
-
-    @media (max-width: ${props => props.theme.breakpoints.sm}) {
-      flex-direction: column;
-      align-items: center;
-    }
+  .lead {
+    max-width: 40rem;
+    font-size: clamp(1.05rem, 1.8vw, 1.22rem);
+    color: ${({ theme }) => theme.colors.neutral[100]};
+    opacity: 0.92;
   }
 `
 
-const HeroButton = styled(motion.div)`
-  .btn {
-    padding: ${props => props.theme.spacing[4]} ${props => props.theme.spacing[8]};
-    font-size: ${props => props.theme.fontSizes.lg};
-    font-weight: ${props => props.theme.fontWeights.semibold};
-    border-radius: ${props => props.theme.radii['2xl']};
-    display: flex;
-    align-items: center;
-    gap: ${props => props.theme.spacing[2]};
-    transition: all ${props => props.theme.transitions.normal};
-    text-decoration: none;
-    box-shadow: ${props => props.theme.shadows.lg};
+const HeroActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing[3]};
+  margin-top: ${({ theme }) => theme.spacing[6]};
+`
 
-    @media (max-width: 768px) {
-      padding: ${props => props.theme.spacing[3]} ${props => props.theme.spacing[6]};
-      font-size: ${props => props.theme.fontSizes.md};
-      width: 100%;
-      justify-content: center;
-      max-width: 280px;
-    }
+const StatsRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing[4]};
+  margin-top: ${({ theme }) => theme.spacing[8]};
 
-    &:hover {
-      transform: translateY(-3px);
-      box-shadow: ${props => props.theme.shadows.xl};
-
-      @media (max-width: 768px) {
-        transform: translateY(-2px);
-      }
-    }
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, ${props => props.theme.colors.accent.gold}, ${props => props.theme.colors.accent.coral});
-    color: ${props => props.theme.colors.neutral.white};
-    border: none;
-
-    &:hover {
-      background: linear-gradient(135deg, ${props => props.theme.colors.accent.coral}, ${props => props.theme.colors.accent.terracotta});
-      color: ${props => props.theme.colors.neutral.white};
-    }
-  }
-
-  .btn-secondary {
-    background: rgba(255, 255, 255, 0.9);
-    color: ${props => props.theme.colors.primary.main};
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-
-    &:hover {
-      background: ${props => props.theme.colors.neutral.white};
-      border-color: ${props => props.theme.colors.accent.gold};
-      color: ${props => props.theme.colors.primary.main};
-    }
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    grid-template-columns: 1fr;
   }
 `
 
-const ScrollIndicator = styled(motion.div)`
+const StatCard = styled(motion.div)`
+  padding: ${({ theme }) => theme.spacing[5]};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(18px);
+
+  strong {
+    display: block;
+    margin-bottom: ${({ theme }) => theme.spacing[2]};
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-family: ${({ theme }) => theme.fonts.heading};
+    color: ${({ theme }) => theme.colors.neutral.white};
+  }
+
+  span {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+  }
+`
+
+const HeroVisual = styled(motion.div)`
+  position: relative;
+  min-height: 40rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    min-height: 34rem;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    min-height: 28rem;
+  }
+`
+
+const MainVisual = styled.div`
   position: absolute;
-  bottom: ${props => props.theme.spacing[8]};
-  left: 50%;
-  transform: translateX(-50%);
-  color: ${props => props.theme.colors.neutral.white};
-  text-align: center;
-  cursor: pointer;
+  inset: 8% 10% 8% 8%;
+  border-radius: ${({ theme }) => theme.radii['3xl']};
+  overflow: hidden;
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  box-shadow: ${({ theme }) => theme.shadows.xl};
+  background:
+    linear-gradient(180deg, rgba(4, 21, 33, 0.08), rgba(4, 21, 33, 0.68)),
+    url('${getPublicImagePath('images/marine/underwater.jpg')}') center/cover no-repeat;
 
-  .scroll-text {
-    font-size: ${props => props.theme.fontSizes.sm};
-    margin-bottom: ${props => props.theme.spacing[2]};
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 20%, rgba(2, 11, 19, 0.85) 100%);
+  }
+`
+
+const FloatingCard = styled(motion.div)`
+  position: absolute;
+  width: min(18rem, 44%);
+  padding: ${({ theme }) => theme.spacing[4]};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(8, 29, 44, 0.84);
+  backdrop-filter: blur(22px);
+  box-shadow: ${({ theme }) => theme.shadows.base};
+
+  strong {
+    display: block;
+    margin-bottom: ${({ theme }) => theme.spacing[1]};
+    font-size: ${({ theme }) => theme.fontSizes.lg};
+    color: ${({ theme }) => theme.colors.neutral.white};
   }
 
-  .scroll-arrow {
-    width: 2px;
-    height: 30px;
-    background: rgba(255, 255, 255, 0.7);
-    margin: 0 auto;
-    position: relative;
-
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 8px;
-      height: 8px;
-      border-right: 2px solid rgba(255, 255, 255, 0.7);
-      border-bottom: 2px solid rgba(255, 255, 255, 0.7);
-      transform: translateX(-50%) rotate(45deg);
-      animation: bounce 2s infinite;
-    }
+  span {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
   }
 
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-      transform: translateX(-50%) translateY(0) rotate(45deg);
-    }
-    40% {
-      transform: translateX(-50%) translateY(-10px) rotate(45deg);
-    }
-    60% {
-      transform: translateX(-50%) translateY(-5px) rotate(45deg);
-    }
+  &.top {
+    top: 0;
+    right: 2%;
+  }
+
+  &.bottom {
+    left: 0;
+    bottom: 3%;
   }
 `
 
 const Section = styled.section`
-  padding: ${props => props.theme.spacing[20]} 0;
   position: relative;
-
-  &.dark {
-    background: linear-gradient(135deg, ${props => props.theme.colors.neutral[900]}, ${props => props.theme.colors.primary.main});
-    color: ${props => props.theme.colors.neutral.white};
-  }
-
-  &.light {
-    background: ${props => props.theme.colors.neutral[50]};
-  }
-
-  &.primary {
-    background: linear-gradient(135deg, ${props => props.theme.colors.primary.main}, ${props => props.theme.colors.secondary.main});
-    color: ${props => props.theme.colors.neutral.white};
-  }
+  padding: ${({ theme }) => theme.spacing[20]} 0;
 `
 
-const Container = styled.div`
-  max-width: 1200px;
+const SectionInner = styled.div`
+  width: min(1240px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 0 ${props => props.theme.spacing[4]};
 `
 
-const SectionHeader = styled(motion.div)`
-  text-align: center;
-  margin-bottom: ${props => props.theme.spacing[16]};
+const SectionHead = styled(motion.div)`
+  max-width: 40rem;
+  margin-bottom: ${({ theme }) => theme.spacing[10]};
 
   h2 {
-    font-size: clamp(2rem, 4vw, 3rem);
-    margin-bottom: ${props => props.theme.spacing[6]};
-    color: inherit;
-  }
-
-  .subtitle {
-    font-size: ${props => props.theme.fontSizes.xl};
-    color: inherit;
-    opacity: 0.9;
-    max-width: 600px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-`
-
-const FeaturesGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: ${props => props.theme.spacing[8]};
-  margin-top: ${props => props.theme.spacing[12]};
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: ${props => props.theme.spacing[6]};
-    margin-top: ${props => props.theme.spacing[8]};
-  }
-`
-
-const FeatureCard = styled(motion.div)`
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: ${props => props.theme.radii['2xl']};
-  padding: ${props => props.theme.spacing[8]};
-  text-align: center;
-  transition: all ${props => props.theme.transitions.normal};
-
-  @media (max-width: 768px) {
-    padding: ${props => props.theme.spacing[6]};
-  }
-
-  &:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.15);
-    border-color: ${props => props.theme.colors.accent.gold};
-
-    @media (max-width: 768px) {
-      transform: translateY(-3px);
-    }
-  }
-
-  .icon {
-    width: 60px;
-    height: 60px;
-    margin: 0 auto ${props => props.theme.spacing[6]};
-    background: linear-gradient(135deg, ${props => props.theme.colors.accent.gold}, ${props => props.theme.colors.accent.coral});
-    border-radius: ${props => props.theme.radii.full};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: ${props => props.theme.colors.neutral.white};
-
-    @media (max-width: 768px) {
-      width: 50px;
-      height: 50px;
-      margin-bottom: ${props => props.theme.spacing[4]};
-    }
-  }
-
-  h3 {
-    color: inherit;
-    margin-bottom: ${props => props.theme.spacing[4]};
-
-    @media (max-width: 768px) {
-      font-size: ${props => props.theme.fontSizes.lg};
-      margin-bottom: ${props => props.theme.spacing[3]};
-    }
+    margin: ${({ theme }) => `${theme.spacing[4]} 0 ${theme.spacing[4]}`};
   }
 
   p {
-    color: inherit;
-    opacity: 0.9;
-    line-height: 1.6;
-
-    @media (max-width: 768px) {
-      font-size: ${props => props.theme.fontSizes.sm};
-    }
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    font-size: ${({ theme }) => theme.fontSizes.lg};
   }
 `
 
-const RoomsPreview = styled.div`
+const ExperienceGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: ${props => props.theme.spacing[8]};
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing[5]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
+  }
 `
 
-const RoomCard = styled(motion.div)`
-  background: ${props => props.theme.colors.neutral.white};
-  border-radius: ${props => props.theme.radii['2xl']};
-  overflow: hidden;
-  box-shadow: ${props => props.theme.shadows.lg};
-  transition: all ${props => props.theme.transitions.normal};
+const ExperienceCard = styled(motion.article)`
+  padding: ${({ theme }) => theme.spacing[6]};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: ${({ theme }) => theme.colors.surface.card};
+  box-shadow: ${({ theme }) => theme.shadows.base};
 
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: ${props => props.theme.shadows.xl};
+  .icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: ${({ theme }) => theme.spacing[4]};
+    border-radius: 1.2rem;
+    color: ${({ theme }) => theme.colors.neutral.white};
+    background: ${({ theme }) => theme.colors.gradients.button};
   }
+
+  h3 {
+    margin-bottom: ${({ theme }) => theme.spacing[3]};
+    font-size: clamp(1.8rem, 3vw, 2.3rem);
+  }
+
+  p {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+  }
+`
+
+const RoomsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing[5]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const RoomCard = styled(motion.article)`
+  overflow: hidden;
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: ${({ theme }) => theme.colors.surface.cardStrong};
+  box-shadow: ${({ theme }) => theme.shadows.base};
 
   .image {
-    height: 250px;
-    background-size: cover;
+    height: 18rem;
     background-position: center;
+    background-size: cover;
     position: relative;
+  }
 
-    .price {
-      position: absolute;
-      top: ${props => props.theme.spacing[4]};
-      right: ${props => props.theme.spacing[4]};
-      background: linear-gradient(135deg, ${props => props.theme.colors.accent.gold}, ${props => props.theme.colors.accent.coral});
-      color: ${props => props.theme.colors.neutral.white};
-      padding: ${props => props.theme.spacing[2]} ${props => props.theme.spacing[4]};
-      border-radius: ${props => props.theme.radii.full};
-      font-weight: ${props => props.theme.fontWeights.bold};
-      font-size: ${props => props.theme.fontSizes.lg};
-    }
+  .image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 25%, rgba(4, 16, 28, 0.78) 100%);
+  }
+
+  .status {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(8, 29, 44, 0.7);
+    color: ${({ theme }) => theme.colors.neutral.white};
   }
 
   .content {
-    padding: ${props => props.theme.spacing[6]};
-
-    h3 {
-      color: ${props => props.theme.colors.neutral[900]};
-      margin-bottom: ${props => props.theme.spacing[4]};
-    }
-
-    p {
-      color: ${props => props.theme.colors.neutral[600]};
-      margin-bottom: ${props => props.theme.spacing[6]};
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .amenities {
-      display: flex;
-      flex-wrap: wrap;
-      gap: ${props => props.theme.spacing[2]};
-      margin-bottom: ${props => props.theme.spacing[6]};
-
-      .amenity {
-        background: ${props => props.theme.colors.primary[50]};
-        color: ${props => props.theme.colors.primary.main};
-        padding: ${props => props.theme.spacing[1]} ${props => props.theme.spacing[3]};
-        border-radius: ${props => props.theme.radii.full};
-        font-size: ${props => props.theme.fontSizes.sm};
-      }
-    }
-
-    .btn {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-`
-
-const TestimonialsSection = styled.div`
-  margin-top: ${props => props.theme.spacing[16]};
-
-  .swiper {
-    padding: ${props => props.theme.spacing[8]} 0;
+    padding: ${({ theme }) => theme.spacing[6]};
   }
 
-  .swiper-slide {
-    height: auto;
-  }
-`
-
-const TestimonialCard = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: ${props => props.theme.radii['2xl']};
-  padding: ${props => props.theme.spacing[8]};
-  text-align: center;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
-  .quote {
-    font-size: ${props => props.theme.fontSizes.lg};
-    font-style: italic;
-    margin-bottom: ${props => props.theme.spacing[6]};
-    line-height: 1.6;
-    color: inherit;
-    opacity: 0.95;
-  }
-
-  .author {
-    .name {
-      font-weight: ${props => props.theme.fontWeights.semibold};
-      color: ${props => props.theme.colors.accent.gold};
-      margin-bottom: ${props => props.theme.spacing[1]};
-    }
-
-    .location {
-      color: inherit;
-      opacity: 0.8;
-      font-size: ${props => props.theme.fontSizes.sm};
-    }
-  }
-
-  .stars {
+  .meta {
     display: flex;
-    justify-content: center;
-    gap: ${props => props.theme.spacing[1]};
-    margin-bottom: ${props => props.theme.spacing[4]};
-    color: ${props => props.theme.colors.accent.gold};
-  }
-`
-
-const BookingSection = styled.section`
-  background: linear-gradient(135deg, ${props => props.theme.colors.accent.gold}, ${props => props.theme.colors.accent.coral});
-  color: ${props => props.theme.colors.neutral.white};
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm0 0c0 11.046 8.954 20 20 20s20-8.954 20-20-8.954-20-20-20-20 8.954-20 20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
-    opacity: 0.1;
-    animation: float 20s ease-in-out infinite;
+    flex-wrap: wrap;
+    gap: ${({ theme }) => theme.spacing[2]};
+    margin: ${({ theme }) => `${theme.spacing[4]} 0 ${theme.spacing[4]}`};
   }
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(180deg); }
-  }
-`
-
-const ActivitiesSection = styled.section`
-  background: linear-gradient(135deg, 
-    ${props => props.theme.colors.primary.main} 0%, 
-    ${props => props.theme.colors.secondary.main} 50%,
-    ${props => props.theme.colors.accent.coral} 100%
-  );
-  color: ${props => props.theme.colors.neutral.white};
-  padding: ${props => props.theme.spacing[20]} 0;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 100'%3E%3Cpath d='M0,20 Q250,80 500,50 T1000,30 L1000,0 L0,0 Z' fill='%23ffffff'/%3E%3C/svg%3E") no-repeat center top;
-    background-size: cover;
-    z-index: 1;
+  .meta span,
+  .tag {
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: ${({ theme }) => theme.colors.neutral[200]};
+    font-size: 0.78rem;
   }
 
-  .section-content {
-    position: relative;
-    z-index: 2;
-  }
-`
-
-const ActivitiesGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: ${props => props.theme.spacing[8]};
-  margin-top: ${props => props.theme.spacing[12]};
-
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
-    grid-template-columns: 1fr;
-    gap: ${props => props.theme.spacing[6]};
-  }
-`
-
-const ActivityCard = styled(motion.div)`
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: ${props => props.theme.radii['2xl']};
-  overflow: hidden;
-  cursor: pointer;
-  transition: all ${props => props.theme.transitions.normal};
-  display: flex;
-  flex-direction: column;
-
-  &:hover {
-    transform: translateY(-10px);
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-
-  .activity-image {
-    position: relative;
-    height: 200px;
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
-    }
-
-    @media (max-width: 768px) {
-      height: 150px;
-    }
-  }
-
-  .activity-icon {
-    position: relative;
-    z-index: 2;
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: ${props => props.theme.colors.primary.main};
-    box-shadow: ${props => props.theme.shadows.lg};
-
-    @media (max-width: 768px) {
-      width: 50px;
-      height: 50px;
-    }
-  }
-
-  .activity-content {
-    padding: ${props => props.theme.spacing[6]};
-    text-align: center;
-    flex: 1;
-
-    @media (max-width: 768px) {
-      padding: ${props => props.theme.spacing[4]};
-    }
-
-    h4 {
-      color: ${props => props.theme.colors.neutral.white};
-      margin-bottom: ${props => props.theme.spacing[3]};
-      font-size: ${props => props.theme.fontSizes.lg};
-
-      @media (max-width: 768px) {
-        font-size: ${props => props.theme.fontSizes.md};
-      }
-    }
-
-    p {
-      color: rgba(255, 255, 255, 0.9);
-      line-height: 1.6;
-      margin-bottom: ${props => props.theme.spacing[4]};
-      font-size: ${props => props.theme.fontSizes.sm};
-
-      @media (max-width: 768px) {
-        font-size: ${props => props.theme.fontSizes.xs};
-        margin-bottom: ${props => props.theme.spacing[3]};
-      }
-    }
-  }
-
-  .icon {
-    width: 60px;
-    height: 60px;
-    margin: 0 auto ${props => props.theme.spacing[4]};
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: ${props => props.theme.colors.accent.gold};
-  }
-
-  h3 {
-    color: ${props => props.theme.colors.neutral.white};
-    margin-bottom: ${props => props.theme.spacing[3]};
-    font-size: ${props => props.theme.fontSizes.xl};
+  .tag {
+    color: ${({ theme }) => theme.colors.secondary.light};
   }
 
   p {
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.6;
-    margin-bottom: ${props => props.theme.spacing[4]};
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    margin-bottom: ${({ theme }) => theme.spacing[5]};
   }
 
-  .btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: ${props => props.theme.colors.neutral.white};
-    padding: ${props => props.theme.spacing[3]} ${props => props.theme.spacing[6]};
-    border-radius: ${props => props.theme.radii.full};
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: ${props => props.theme.spacing[2]};
-    transition: all ${props => props.theme.transitions.fast};
-
-    @media (max-width: 768px) {
-      padding: ${props => props.theme.spacing[2]} ${props => props.theme.spacing[4]};
-      font-size: ${props => props.theme.fontSizes.sm};
-    }
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateX(5px);
-    }
+  .actions {
+    display: flex;
+    gap: ${({ theme }) => theme.spacing[3]};
+    flex-wrap: wrap;
   }
 `
 
-const Home = () => {
-  const { rooms } = useBooking()
-  const [scrollProgress, setScrollProgress] = useState(0)
-  const { scrollY } = useScroll()
-  const y = useTransform(scrollY, [0, 1000], [0, -200])
+const HighlightBand = styled.section`
+  padding: ${({ theme }) => theme.spacing[8]} 0 ${({ theme }) => theme.spacing[20]};
+`
 
-  const [aboutRef, aboutInView] = useInView({
-    threshold: 0.1,
-    triggerOnce: true,
-  })
+const HighlightPanel = styled.div`
+  width: min(1240px, calc(100% - 2rem));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: ${({ theme }) => theme.spacing[6]};
+  padding: ${({ theme }) => theme.spacing[7]};
+  border-radius: ${({ theme }) => theme.radii['3xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: linear-gradient(135deg, rgba(8, 29, 44, 0.96), rgba(18, 70, 103, 0.88));
+  box-shadow: ${({ theme }) => theme.shadows.lg};
 
-  const [roomsRef, roomsInView] = useInView({
-    threshold: 0.1,
-    triggerOnce: true,
-  })
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
+  }
+`
 
-  const [testimonialsRef, testimonialsInView] = useInView({
-    threshold: 0.1,
-    triggerOnce: true,
-  })
+const HighlightMedia = styled.div`
+  min-height: 26rem;
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  background:
+    linear-gradient(180deg, rgba(4, 16, 28, 0.14), rgba(4, 16, 28, 0.76)),
+    url('${getPublicImagePath('images/marine/diver.jpg')}') center/cover no-repeat;
+  box-shadow: ${({ theme }) => theme.shadows.base};
+`
 
-  const [activitiesRef, activitiesInView] = useInView({
-    threshold: 0.1,
-    triggerOnce: true,
-  })
+const HighlightCopy = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
-  useEffect(() => {
-    const updateScrollProgress = () => {
-      const scrollPx = document.documentElement.scrollTop
-      const winHeightPx = document.documentElement.scrollHeight - document.documentElement.clientHeight
-      const scrolled = scrollPx / winHeightPx
-      setScrollProgress(scrolled)
-    }
-
-    window.addEventListener('scroll', updateScrollProgress)
-    return () => window.removeEventListener('scroll', updateScrollProgress)
-  }, [])
-
-  const features = [
-    {
-      icon: <MapPin size={24} />,
-      title: 'Emplacement Idéal',
-      description: 'Au cœur de Banyuls-sur-Mer, entre mer Méditerranée et vignobles en terrasses, à deux pas du port et des plages.',
-    },
-    {
-      icon: <Heart size={24} />,
-      title: 'Charme Authentique',
-      description: 'Architecture catalane traditionnelle mêlée au confort moderne, dans l\'esprit authentique de la Côte Vermeille.',
-    },
-    {
-      icon: <Star size={24} />,
-      title: 'Service Excellence',
-      description: 'Accueil personnalisé, conciergerie, et attention aux détails pour un séjour mémorable en Méditerranée.',
-    },
-  ]
-
-  const activities = [
-    {
-      icon: <Waves size={30} />,
-      title: 'Plongée Sous-Marine',
-      description: 'Explorez la réserve marine de Banyuls-Cerbère, l\'une des plus belles de Méditerranée. Découvrez la vie sous-marine exceptionnelle.',
-      link: '/activites/plongee',
-      image: getPublicImagePath('images/marine/diver.jpg')
-    },
-    {
-      icon: <Grape size={30} />,
-      title: 'Œnotourisme',
-      description: 'Dégustez les fameux vins de Banyuls AOC dans nos vignobles en terrasses face à la mer. Visites et dégustations organisées.',
-      link: '/activites/vin',
-      image: getPublicImagePath('images/banyuls/vineyards.jpg')
-    },
-    {
-      icon: <Mountain size={30} />,
-      title: 'Randonnées',
-      description: 'Parcourez les sentiers du littoral et des Pyrénées catalanes. Vues panoramiques sur la Méditerranée et l\'Espagne.',
-      link: '/activites/randonnee',
-      image: getPublicImagePath('images/banyuls/coastline.jpg')
-    },
-    {
-      icon: <Sailboat size={30} />,
-      title: 'Navigation',
-      description: 'Louez un voilier ou participez à nos sorties en mer. Découvrez la côte depuis les flots bleus de la Méditerranée.',
-      link: '/activites/voile',
-      image: getPublicImagePath('images/marine/sailing.jpg')
-    },
-    {
-      icon: <Camera size={30} />,
-      title: 'Patrimoine Culturel',
-      description: 'Visitez les œuvres d\'Aristide Maillol, les tours Madeloc, et découvrez l\'histoire riche de Banyuls-sur-Mer.',
-      link: '/activites/culture',
-      image: getPublicImagePath('images/banyuls/port.jpg')
-    },
-    {
-      icon: <Compass size={30} />,
-      title: 'Excursions',
-      description: 'Découvrez la Costa Brava espagnole, Collioure, Port-Vendres et tous les trésors de la Côte Vermeille.',
-      link: '/activites/excursions',
-      image: getPublicImagePath('images/banyuls/coastline.jpg')
-    }
-  ]
-
-  const testimonials = [
-    {
-      quote: "Un séjour absolument magique ! La vue depuis notre chambre était à couper le souffle, et l'accueil chaleureux nous a fait nous sentir comme chez nous.",
-      author: "Marie & Pierre Dubois",
-      location: "Lyon, France",
-      rating: 5,
-    },
-    {
-      quote: "L'emplacement est parfait pour découvrir Banyuls et ses merveilles. Les vignobles, la mer, tout est accessible à pied. Service impeccable !",
-      author: "Carlos & Isabella Rodriguez",
-      location: "Barcelona, Espagne",
-      rating: 5,
-    },
-    {
-      quote: "Une escapade romantique parfaite ! Le coucher de soleil depuis la terrasse, le petit-déjeuner face à la mer... Des souvenirs inoubliables.",
-      author: "Sophie Martin",
-      location: "Toulouse, France",
-      rating: 5,
-    },
-  ]
-
-  const scrollToAbout = () => {
-    const aboutSection = document.getElementById('about')
-    aboutSection?.scrollIntoView({ behavior: 'smooth' })
+  h2 {
+    margin: ${({ theme }) => `${theme.spacing[4]} 0 ${theme.spacing[4]}`};
   }
 
+  p {
+    color: ${({ theme }) => theme.colors.neutral[200]};
+    margin-bottom: ${({ theme }) => theme.spacing[5]};
+    font-size: ${({ theme }) => theme.fontSizes.lg};
+  }
+`
+
+const Points = styled.div`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[4]};
+`
+
+const Point = styled(motion.div)`
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: ${({ theme }) => theme.spacing[3]};
+  padding: ${({ theme }) => theme.spacing[4]};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(180, 224, 241, 0.08);
+
+  .icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.08);
+    color: ${({ theme }) => theme.colors.secondary.light};
+  }
+
+  strong {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: ${({ theme }) => theme.colors.neutral.white};
+  }
+
+  span {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+  }
+`
+
+const TestimonialGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing[5]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const TestimonialCard = styled(motion.blockquote)`
+  padding: ${({ theme }) => theme.spacing[6]};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(18px);
+
+  .stars {
+    display: flex;
+    gap: 0.35rem;
+    margin-bottom: ${({ theme }) => theme.spacing[4]};
+    color: ${({ theme }) => theme.colors.accent.gold};
+  }
+
+  p {
+    color: ${({ theme }) => theme.colors.neutral[200]};
+    margin-bottom: ${({ theme }) => theme.spacing[5]};
+    font-size: ${({ theme }) => theme.fontSizes.lg};
+  }
+
+  footer {
+    color: ${({ theme }) => theme.colors.neutral[400]};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+  }
+`
+
+const FinalCTA = styled.section`
+  padding: 0 0 ${({ theme }) => theme.spacing[20]};
+`
+
+const FinalPanel = styled(motion.div)`
+  width: min(1240px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: ${({ theme }) => theme.spacing[8]};
+  border-radius: ${({ theme }) => theme.radii['3xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background:
+    radial-gradient(circle at top left, rgba(246, 197, 119, 0.12), transparent 22%),
+    radial-gradient(circle at 80% 20%, rgba(88, 199, 212, 0.18), transparent 28%),
+    rgba(8, 29, 44, 0.92);
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+  text-align: center;
+
+  h2 {
+    margin: ${({ theme }) => `${theme.spacing[4]} 0 ${theme.spacing[4]}`};
+  }
+
+  p {
+    max-width: 42rem;
+    margin: 0 auto;
+    color: ${({ theme }) => theme.colors.neutral[200]};
+    font-size: ${({ theme }) => theme.fontSizes.lg};
+  }
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: ${({ theme }) => theme.spacing[3]};
+    margin-top: ${({ theme }) => theme.spacing[6]};
+  }
+`
+
+const features = [
+  {
+    icon: <MapPin size={20} />,
+    title: 'La baie comme decor quotidien',
+    description:
+      'Depuis la residence, on bascule en quelques minutes entre plage, port, restaurants et sentiers de la Cote Vermeille.',
+  },
+  {
+    icon: <Fish size={20} />,
+    title: 'Un vrai terrain de jeu pour la plongee',
+    description:
+      'Le theme mer et plongee ne sert pas juste le style : il raconte la reserve marine et l energie sous-marine de Banyuls.',
+  },
+  {
+    icon: <Sailboat size={20} />,
+    title: 'Des appartements pensés pour durer dans la memoire',
+    description:
+      'Terrasses, vues, grands volumes et rythme mediterraneen : chaque sejour doit donner l impression d embarquer.',
+  },
+]
+
+const immersionPoints = [
+  {
+    icon: <Compass size={18} />,
+    title: 'Reserve marine a quelques minutes',
+    text: 'Snorkeling, plongee bouteille, photo sous-marine et sorties accompagnees autour de Banyuls-Cerbère.',
+  },
+  {
+    icon: <Shield size={18} />,
+    title: 'Parcours de reservation plus clair',
+    text: 'Navigation, filtres, detail des appartements et appels a l action ont ete realignes pour reduire les frictions.',
+  },
+  {
+    icon: <Users size={18} />,
+    title: 'Du duo jusqu a la grande tribu',
+    text: 'Des formats T2 a T5/6 pour des escapades romantiques, des semaines familiales ou des sejours entre amis.',
+  },
+]
+
+const testimonials = [
+  {
+    quote:
+      'La sensation est immediate : on arrive, on ralentit, puis on profite de la mer du matin au soir.',
+    author: 'Claire et Martin, Toulouse',
+  },
+  {
+    quote:
+      'Le cadre est elegant sans etre froid. On sent Banyuls, la plongee, la lumiere et le cote residence de caractere.',
+    author: 'Lucie, Lyon',
+  },
+  {
+    quote:
+      'La vue, la fluidite du parcours et les infos utiles donnent envie de reserver sans hesitation.',
+    author: 'Hugo et Ines, Montpellier',
+  },
+]
+
+const Home = () => {
+  const { rooms, hotelSettings } = useBooking()
+  const { scrollY } = useScroll()
+  const heroOffset = useTransform(scrollY, [0, 420], [0, -70])
+  const visualOffset = useTransform(scrollY, [0, 420], [0, 45])
+
+  const featuredRooms = rooms.filter((room) => room.featured).slice(0, 3)
+  const displayedRooms = featuredRooms.length ? featuredRooms : rooms.slice(0, 3)
+  const availableRooms = rooms.filter((room) => room.available).length
+  const startingPrice = rooms.length
+    ? Math.min(...rooms.map((room) => room.price.lowSeason))
+    : 0
+  const maxCapacity = rooms.length
+    ? Math.max(...rooms.map((room) => room.capacity))
+    : 0
+
   return (
-    <HomePage>
-      {/* Hero Section */}
-      <HeroSection>
-          <HeroBackground>
-            <Swiper
-              modules={[Navigation, Pagination, Autoplay, EffectFade]}
-              spaceBetween={0}
-              slidesPerView={1}
-              effect="fade"
-              autoplay={{
-                delay: 5000,
-                disableOnInteraction: false,
-              }}
-              pagination={{
-                clickable: true,
-              }}
-              loop={true}
-            >
-              {heroImages.map((image, index) => (
-                <SwiperSlide
-                  key={index}
-                  style={{
-                    backgroundImage: `url(${image})`,
-                  }}
-                />
-              ))}
-            </Swiper>
-          </HeroBackground>
-          
-          <HeroOverlay />
-          
-          <HeroContent
-            style={{ y }}
-            initial={{ opacity: 0, y: 50 }}
+    <HomeShell>
+      <Hero>
+        <HeroBackdrop />
+        <HeroSurface />
+        <MarineElements density="heavy" divingTheme />
+
+        <HeroInner>
+          <HeroCopy
+            style={{ y: heroOffset }}
+            initial={{ opacity: 0, y: 26 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5 }}
+            transition={{ duration: 0.9 }}
           >
-            <h1>La Grande Voile</h1>
-            <p className="subtitle">
-              Votre havre de paix face à la Méditerranée à Banyuls-sur-Mer
-              <br />
-              Entre vignobles et mer, vivez l'authenticité catalane
+            <span className="eyebrow">Séjour mer & plongée</span>
+            <h1>Une residence inspiree par la baie, la lumière et les fonds marins.</h1>
+            <p className="lead">
+              La Grande Voile se repositionne comme une adresse plus immersive, plus
+              fluide et plus premium a Banyuls-sur-Mer : design oceane, transitions
+              douces, navigation claire et reservation recentree sur l experience.
             </p>
-            
-            <div className="hero-buttons">
-              <HeroButton
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 1 }}
-              >
-                <Link to="/reservation" className="btn btn-primary">
-                  <Calendar size={20} />
-                  Réserver maintenant
-                </Link>
-              </HeroButton>
-              
-              <HeroButton
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 1.2 }}
-              >
-                <Link to="/rooms" className="btn btn-secondary">
-                  Découvrir nos appartements
-                  <ChevronRight size={20} />
-                </Link>
-              </HeroButton>
-            </div>
-          </HeroContent>
 
-          <ScrollIndicator
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2 }}
-            onClick={scrollToAbout}
-          >
-            <div className="scroll-text">Découvrir</div>
-            <div className="scroll-arrow"></div>
-          </ScrollIndicator>
-      </HeroSection>
+            <HeroActions>
+              <Link to="/reservation" className="btn btn-primary">
+                <Calendar size={18} />
+                Reserver votre sejour
+              </Link>
+              <Link to="/rooms" className="btn btn-secondary">
+                Explorer les appartements
+                <ChevronRight size={18} />
+              </Link>
+            </HeroActions>
 
-      {/* About Section */}
-      <Section id="about" className="primary" ref={aboutRef}>
-        <Container>
-          <SectionHeader
-            initial={{ opacity: 0, y: 30 }}
-            animate={aboutInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8 }}
+            <StatsRow>
+              <StatCard initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
+                <strong>{availableRooms || rooms.length}</strong>
+                <span>appartements disponibles a explorer</span>
+              </StatCard>
+              <StatCard initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}>
+                <strong>{startingPrice}€</strong>
+                <span>a partir de la basse saison par semaine</span>
+              </StatCard>
+              <StatCard initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
+                <strong>{maxCapacity}</strong>
+                <span>voyageurs pour la plus grande configuration</span>
+              </StatCard>
+            </StatsRow>
+          </HeroCopy>
+
+          <HeroVisual
+            style={{ y: visualOffset }}
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.9, delay: 0.18 }}
           >
-            <h2>L'Art de Vivre Méditerranéen</h2>
-            <p className="subtitle">
-              Découvrez l'authenticité de Banyuls-sur-Mer dans notre hôtel de charme, 
-              où tradition catalane et confort moderne s'harmonisent parfaitement.
+            <MainVisual />
+
+            <FloatingCard
+              className="top"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <strong>Ambiance reserve marine</strong>
+              <span>Textures d eau, profondeur bleue, reflets et rythme apaisé.</span>
+            </FloatingCard>
+
+            <FloatingCard
+              className="bottom"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+            >
+              <strong>Banyuls au centre</strong>
+              <span>{hotelSettings.address}</span>
+            </FloatingCard>
+          </HeroVisual>
+        </HeroInner>
+      </Hero>
+
+      <Section>
+        <SectionInner>
+          <SectionHead
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65 }}
+            viewport={{ once: true }}
+          >
+            <span className="eyebrow">Nouveau cap visuel</span>
+            <h2>Un theme entierement recentré sur la mer, la plongee et la sensation de fluidite.</h2>
+            <p>
+              Le site ne cherche plus seulement a informer. Il doit donner envie de
+              plonger dans l atmosphere de Banyuls, de comprendre vite l offre et de
+              circuler sans accrocs jusqu a la reservation.
             </p>
-          </SectionHeader>
+          </SectionHead>
 
-          <FeaturesGrid>
+          <ExperienceGrid>
             {features.map((feature, index) => (
-              <FeatureCard
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                animate={aboutInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
+              <ExperienceCard
+                key={feature.title}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: index * 0.1 }}
+                viewport={{ once: true }}
               >
                 <div className="icon">{feature.icon}</div>
                 <h3>{feature.title}</h3>
                 <p>{feature.description}</p>
-              </FeatureCard>
+              </ExperienceCard>
             ))}
-          </FeaturesGrid>
-
-          <SectionHeader
-            initial={{ opacity: 0, y: 30 }}
-            animate={aboutInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            style={{ marginTop: '4rem' }}
-          >
-            <h2>Activités à Proximité</h2>
-            <p className="subtitle">
-              Explorez les meilleures activités à faire à Banyuls-sur-Mer et ses environs,
-              pour un séjour riche en découvertes et en émotions.
-            </p>
-          </SectionHeader>
-
-          <ActivitiesGrid>
-            {activities.map((activity, index) => (
-              <ActivityCard
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                animate={aboutInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-              >
-                <div
-                  className="activity-image"
-                  style={{ backgroundImage: `url(${activity.image || getPublicImagePath('images/banyuls/coastline.jpg')})` }}
-                >
-                  <div className="activity-icon">
-                    {activity.icon}
-                  </div>
-                </div>
-                <div className="activity-content">
-                  <h4>{activity.title}</h4>
-                  <p>
-                    {activity.description}
-                  </p>
-                  <Link to={activity.link} className="btn btn-primary" style={{ marginTop: '1rem' }}>
-                    En savoir plus
-                    <ChevronRight size={16} />
-                  </Link>
-                </div>
-              </ActivityCard>
-            ))}
-          </ActivitiesGrid>
-        </Container>
+          </ExperienceGrid>
+        </SectionInner>
       </Section>
 
-      {/* Rooms Section */}
-      <Section ref={roomsRef}>
-        <Container>
-          <SectionHeader
-            initial={{ opacity: 0, y: 30 }}
-            animate={roomsInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8 }}
+      <Section>
+        <SectionInner>
+          <SectionHead
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65 }}
+            viewport={{ once: true }}
           >
-            <h2>Nos Chambres & Suites</h2>
-            <p className="subtitle">
-              Chaque chambre offre une expérience unique avec vue sur la mer ou les vignobles, 
-              dans un cadre raffiné inspiré de l'art de vivre méditerranéen.
+            <span className="eyebrow">Appartements signature</span>
+            <h2>Des logements choisis pour leur présence, leur vue et leur potentiel d immersion.</h2>
+            <p>
+              On met en avant les espaces les plus marquants avec plus de lisibilite
+              sur la capacité, la terrasse, la vue et les prix pour mieux comparer.
             </p>
-          </SectionHeader>
+          </SectionHead>
 
-          <RoomsPreview>
-            {rooms.slice(0, 3).map((room, index) => (
+          <RoomsGrid>
+            {displayedRooms.map((room, index) => (
               <RoomCard
                 key={room.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={roomsInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: index * 0.08 }}
+                viewport={{ once: true }}
               >
-                <div 
+                <div
                   className="image"
                   style={{ backgroundImage: `url(${room.images[0]})` }}
                 >
-                  <div className="price">€{room.price.midSeason}/semaine</div>
+                  <div className="status">{room.available ? 'Disponible' : 'Complet'}</div>
                 </div>
                 <div className="content">
+                  <span className="tag">{room.type}</span>
                   <h3>{room.name}</h3>
-                  <p>{room.description.substring(0, 120)}...</p>
-                  <div className="amenities">
-                    {room.amenities.slice(0, 4).map((amenity, idx) => (
-                      <span key={idx} className="amenity">{amenity}</span>
-                    ))}
+                  <div className="meta">
+                    <span>{room.capacity} voyageurs</span>
+                    <span>{room.size}</span>
+                    <span>{room.price.lowSeason}€ basse saison</span>
                   </div>
-                  <Link to={`/rooms/${room.id}`} className="btn btn-primary">
-                    Voir les détails
-                    <ChevronRight size={16} />
-                  </Link>
+                  <p>{room.description}</p>
+                  <div className="actions">
+                    <Link to={`/rooms/${room.id}`} className="btn btn-secondary">
+                      Voir le detail
+                    </Link>
+                    <Link to={`/booking/${room.id}`} className="btn btn-primary">
+                      Reserver
+                    </Link>
+                  </div>
                 </div>
               </RoomCard>
             ))}
-          </RoomsPreview>
+          </RoomsGrid>
+        </SectionInner>
+      </Section>
 
-          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-            <Link to="/rooms" className="btn btn-outline">
-              Voir toutes nos chambres
+      <HighlightBand>
+        <HighlightPanel>
+          <HighlightMedia />
+          <HighlightCopy>
+            <span className="eyebrow">Mer & profondeur</span>
+            <h2>La plongee devient une vraie composante du recit de marque.</h2>
+            <p>
+              Banyuls n est pas seulement une station au bord de l eau. C est une
+              porte d entree vers les reserves, les sentiers sous-marins et une
+              biodiversite qui donne une identite forte au sejour.
+            </p>
+
+            <Points>
+              {immersionPoints.map((item, index) => (
+                <Point
+                  key={item.title}
+                  initial={{ opacity: 0, x: 18 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.45, delay: index * 0.08 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="icon">{item.icon}</div>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <span>{item.text}</span>
+                  </div>
+                </Point>
+              ))}
+            </Points>
+          </HighlightCopy>
+        </HighlightPanel>
+      </HighlightBand>
+
+      <Section>
+        <SectionInner>
+          <SectionHead
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65 }}
+            viewport={{ once: true }}
+          >
+            <span className="eyebrow">Retour d impression</span>
+            <h2>Une ambiance plus calme, plus premium, mais toujours accessible.</h2>
+            <p>
+              L objectif du redesign est simple : garder l authenticite du lieu tout
+              en donnant une sensation plus professionnelle et mieux travaillée.
+            </p>
+          </SectionHead>
+
+          <TestimonialGrid>
+            {testimonials.map((testimonial, index) => (
+              <TestimonialCard
+                key={testimonial.author}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: index * 0.08 }}
+                viewport={{ once: true }}
+              >
+                <div className="stars">
+                  {Array.from({ length: 5 }).map((_, starIndex) => (
+                    <Star key={starIndex} size={16} fill="currentColor" />
+                  ))}
+                </div>
+                <p>“{testimonial.quote}”</p>
+                <footer>{testimonial.author}</footer>
+              </TestimonialCard>
+            ))}
+          </TestimonialGrid>
+        </SectionInner>
+      </Section>
+
+      <FinalCTA>
+        <FinalPanel
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65 }}
+          viewport={{ once: true }}
+        >
+          <span className="eyebrow">Passer a l action</span>
+          <h2>Prêt a faire respirer le site comme une vraie adresse bord de mer ?</h2>
+          <p>
+            La navigation est maintenant plus nette, les sections plus utiles et les
+            appels a l action mieux relies aux vrais parcours. Il ne reste plus qu a
+            choisir l appartement qui vous ressemble.
+          </p>
+          <div className="actions">
+            <Link to="/rooms" className="btn btn-secondary">
+              <Waves size={18} />
+              Parcourir les appartements
+            </Link>
+            <Link to="/contact" className="btn btn-outline">
+              <Phone size={18} />
+              Nous contacter
+            </Link>
+            <Link to="/reservation" className="btn btn-accent">
+              <Calendar size={18} />
+              Envoyer une demande
             </Link>
           </div>
-        </Container>
-      </Section>
-
-      {/* Testimonials Section */}
-      <Section className="dark" ref={testimonialsRef}>
-        <Container>
-          <SectionHeader
-            initial={{ opacity: 0, y: 30 }}
-            animate={testimonialsInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8 }}
-          >
-            <h2>Ils Ont Vécu l'Expérience</h2>
-            <p className="subtitle">
-              Découvrez les témoignages de nos hôtes qui ont savouré 
-              l'art de vivre méditerranéen à La Grande Voile.
-            </p>
-          </SectionHeader>
-
-          <TestimonialsSection>
-            <Swiper
-              modules={[Navigation, Pagination, Autoplay]}
-              spaceBetween={30}
-              slidesPerView={1}
-              autoplay={{
-                delay: 4000,
-                disableOnInteraction: false,
-              }}
-              pagination={{
-                clickable: true,
-              }}
-              breakpoints={{
-                768: {
-                  slidesPerView: 2,
-                },
-                1024: {
-                  slidesPerView: 3,
-                },
-              }}
-            >
-              {testimonials.map((testimonial, index) => (
-                <SwiperSlide key={index}>
-                  <TestimonialCard>
-                    <div>
-                      <div className="stars">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} size={20} fill="currentColor" />
-                        ))}
-                      </div>
-                      <p className="quote">"{testimonial.quote}"</p>
-                    </div>
-                    <div className="author">
-                      <div className="name">{testimonial.author}</div>
-                      <div className="location">{testimonial.location}</div>
-                    </div>
-                  </TestimonialCard>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </TestimonialsSection>
-        </Container>
-      </Section>
-
-      {/* CTA Section */}
-      <BookingSection>
-        <Container>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            style={{ position: 'relative', zIndex: 1 }}
-          >
-            <h2 style={{ marginBottom: '1.5rem' }}>
-              Réservez Votre Séjour de Rêve
-            </h2>
-            <p style={{ fontSize: '1.25rem', marginBottom: '2rem', opacity: 0.9 }}>
-              Découvrez la magie de Banyuls-sur-Mer et laissez-vous séduire par l'art de vivre méditerranéen.
-              <br />
-              Votre escapade authentique vous attend à La Grande Voile.
-            </p>
-            
-            <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link to="/reservation" className="btn" style={{
-                background: 'rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                backdropFilter: 'blur(10px)',
-                padding: '1rem 2rem',
-                fontSize: '1.125rem',
-                fontWeight: 600,
-                borderRadius: '2rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease',
-              }}>
-                <Calendar size={20} />
-                Réserver maintenant
-              </Link>
-              
-              <Link to="/contact" className="btn" style={{
-                background: 'rgba(255, 255, 255, 0.9)',
-                color: '#1e3a8a',
-                border: '2px solid transparent',
-                padding: '1rem 2rem',
-                fontSize: '1.125rem',
-                fontWeight: 600,
-                borderRadius: '2rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease',
-              }}>
-                <Phone size={20} />
-                Nous contacter
-              </Link>
-            </div>
-          </motion.div>
-        </Container>
-      </BookingSection>
-    </HomePage>
+        </FinalPanel>
+      </FinalCTA>
+    </HomeShell>
   )
 }
 

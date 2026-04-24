@@ -1,223 +1,231 @@
 import React from 'react'
 import styled, { keyframes } from 'styled-components'
-import { motion } from 'framer-motion'
 
-const float = keyframes`
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-10px) rotate(2deg); }
+const rise = keyframes`
+  0% {
+    transform: translate3d(0, 18px, 0) scale(0.95);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate3d(18px, -34px, 0) scale(1.08);
+    opacity: 0;
+  }
 `
 
-const swim = keyframes`
-  0% { transform: translateX(-50px); }
-  100% { transform: translateX(50px); }
+const drift = keyframes`
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(24px, -16px, 0) rotate(4deg);
+  }
 `
 
-const tentacle = keyframes`
-  0%, 100% { transform: rotate(-5deg); }
-  50% { transform: rotate(5deg); }
+const sway = keyframes`
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(-1deg);
+  }
+  50% {
+    transform: translate3d(-18px, 12px, 0) rotate(2deg);
+  }
 `
 
-const MarineContainer = styled(motion.div)`
+const Field = styled.div`
   position: absolute;
+  inset: 0;
   pointer-events: none;
-  z-index: ${props => props.zIndex || 1};
-  opacity: ${props => props.opacity || 0.7};
+  overflow: hidden;
+  z-index: ${({ $zIndex }) => $zIndex || 0};
 `
 
-const FloatingElement = styled.div`
-  animation: ${float} ${props => props.$duration || 3}s ease-in-out infinite;
-  animation-delay: ${props => props.$delay || 0}s;
-  color: ${props => props.$color || props.theme.colors.secondary};
-  font-size: ${props => props.$size || '2rem'};
+const Bubble = styled.span`
+  position: absolute;
+  width: ${({ $size }) => $size};
+  height: ${({ $size }) => $size};
+  left: ${({ $left }) => $left};
+  top: ${({ $top }) => $top};
+  border-radius: 50%;
+  border: 1px solid ${({ $border }) => $border};
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.5), ${({ $fill }) => $fill});
+  box-shadow: 0 0 40px ${({ $glow }) => $glow};
+  opacity: ${({ $opacity }) => $opacity};
+  animation: ${rise} ${({ $duration }) => $duration}s ease-in-out infinite;
+  animation-delay: ${({ $delay }) => $delay}s;
 `
 
-const SwimmingElement = styled.div`
-  animation: ${swim} ${props => props.$duration || 8}s linear infinite;
-  animation-delay: ${props => props.$delay || 0}s;
-  color: ${props => props.$color || props.theme.colors.primary};
-  font-size: ${props => props.$size || '1.5rem'};
+const Current = styled.span`
+  position: absolute;
+  width: ${({ $width }) => $width};
+  height: 1px;
+  left: ${({ $left }) => $left};
+  top: ${({ $top }) => $top};
+  transform-origin: left center;
+  background: linear-gradient(90deg, transparent, ${({ $color }) => $color}, transparent);
+  opacity: ${({ $opacity }) => $opacity};
+  filter: blur(0.5px);
+  animation: ${drift} ${({ $duration }) => $duration}s ease-in-out infinite;
+  animation-delay: ${({ $delay }) => $delay}s;
 `
 
-const TentacleElement = styled.div`
-  animation: ${tentacle} ${props => props.$duration || 2}s ease-in-out infinite;
-  animation-delay: ${props => props.$delay || 0}s;
-  color: ${props => props.$color || '#8B4E6B'};
-  font-size: ${props => props.$size || '2.5rem'};
-  transform-origin: bottom center;
+const Ribbon = styled.span`
+  position: absolute;
+  width: ${({ $width }) => $width};
+  height: ${({ $height }) => $height};
+  left: ${({ $left }) => $left};
+  top: ${({ $top }) => $top};
+  border-radius: 999px;
+  background: linear-gradient(180deg, ${({ $from }) => $from}, transparent 75%);
+  opacity: ${({ $opacity }) => $opacity};
+  filter: blur(8px);
+  animation: ${sway} ${({ $duration }) => $duration}s ease-in-out infinite;
+  animation-delay: ${({ $delay }) => $delay}s;
 `
 
-const MarineIcon = ({ type, style, ...props }) => {
-  const icons = {
-    fish: '🐟',
-    octopus: '🐙',
-    merou: '🐠',
-    seahorse: '🦑',
-    shell: '🐚',
-    starfish: '⭐',
-    coral: '🪸',
-    wave: '🌊',
-    anchor: '⚓',
-    diving: '🤿',
-    jellyfish: '🪼'
-  }
-
-  return <span style={style} {...props}>{icons[type] || icons.fish}</span>
+const densityMap = {
+  light: { bubbles: 7, currents: 3, ribbons: 2 },
+  normal: { bubbles: 12, currents: 5, ribbons: 3 },
+  heavy: { bubbles: 18, currents: 7, ribbons: 4 },
 }
 
-export const MarineFloat = ({ type, position, duration, delay, size, color, zIndex }) => (
-  <MarineContainer
-    style={position}
-    zIndex={zIndex}
-    initial={{ opacity: 0, scale: 0 }}
-    animate={{ opacity: 0.7, scale: 1 }}
-    transition={{ duration: 1, delay: delay * 0.5 }}
-  >
-    <FloatingElement $duration={duration} $delay={delay} $size={size}>
-      <MarineIcon type={type} style={{ color }} />
-    </FloatingElement>
-  </MarineContainer>
+const createBubbleConfig = (index, divingTheme) => ({
+  size: `${18 + (index % 5) * 14}px`,
+  left: `${(index * 11 + 7) % 100}%`,
+  top: `${18 + ((index * 13) % 72)}%`,
+  delay: index * 0.7,
+  duration: 9 + (index % 4) * 2.5,
+  opacity: divingTheme ? 0.24 + (index % 4) * 0.05 : 0.14 + (index % 4) * 0.04,
+  fill: divingTheme ? 'rgba(99, 211, 223, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+  border: divingTheme ? 'rgba(173, 233, 240, 0.35)' : 'rgba(219, 233, 242, 0.24)',
+  glow: divingTheme ? 'rgba(88, 199, 212, 0.18)' : 'rgba(255, 255, 255, 0.12)',
+})
+
+const createCurrentConfig = (index, divingTheme) => ({
+  width: `${160 + (index % 4) * 80}px`,
+  left: `${(index * 16 + 12) % 95}%`,
+  top: `${16 + ((index * 17) % 68)}%`,
+  delay: index * 0.9,
+  duration: 14 + (index % 3) * 4,
+  opacity: divingTheme ? 0.42 : 0.22,
+  color: divingTheme ? 'rgba(135, 237, 246, 0.42)' : 'rgba(223, 251, 255, 0.24)',
+})
+
+const createRibbonConfig = (index, divingTheme) => ({
+  width: `${180 + (index % 3) * 70}px`,
+  height: `${28 + (index % 4) * 10}px`,
+  left: `${(index * 23 + 5) % 92}%`,
+  top: `${12 + ((index * 19) % 76)}%`,
+  delay: index * 1.1,
+  duration: 16 + (index % 3) * 5,
+  opacity: divingTheme ? 0.22 : 0.12,
+  from: divingTheme ? 'rgba(88, 199, 212, 0.34)' : 'rgba(255, 255, 255, 0.18)',
+})
+
+export const MarineFloat = ({ position = {}, duration = 10, delay = 0, size = '42px', color }) => (
+  <Bubble
+    $size={size}
+    $left={position.left || '50%'}
+    $top={position.top || '50%'}
+    $duration={duration}
+    $delay={delay}
+    $opacity={0.22}
+    $fill={color || 'rgba(99, 211, 223, 0.12)'}
+    $border="rgba(173, 233, 240, 0.32)"
+    $glow="rgba(88, 199, 212, 0.18)"
+  />
 )
 
-export const MarineSwim = ({ type, position, duration, delay, size, color, zIndex }) => (
-  <MarineContainer
-    style={position}
-    zIndex={zIndex}
-    initial={{ opacity: 0, x: -100 }}
-    animate={{ opacity: 0.6, x: 0 }}
-    transition={{ duration: 1.5, delay: delay * 0.3 }}
-  >
-    <SwimmingElement $duration={duration} $delay={delay} $size={size}>
-      <MarineIcon type={type} style={{ color }} />
-    </SwimmingElement>
-  </MarineContainer>
+export const MarineSwim = ({ position = {}, duration = 16, delay = 0, size = '220px', color }) => (
+  <Current
+    $width={size}
+    $left={position.left || '40%'}
+    $top={position.top || '50%'}
+    $duration={duration}
+    $delay={delay}
+    $opacity={0.28}
+    $color={color || 'rgba(223, 251, 255, 0.26)'}
+  />
 )
 
-export const MarineTentacle = ({ type, position, duration, delay, size, color, zIndex }) => (
-  <MarineContainer
-    style={position}
-    zIndex={zIndex}
-    initial={{ opacity: 0, scale: 0 }}
-    animate={{ opacity: 0.8, scale: 1 }}
-    transition={{ duration: 1.2, delay: delay * 0.4 }}
-  >
-    <TentacleElement $duration={duration} $delay={delay} $size={size}>
-      <MarineIcon type={type} style={{ color }} />
-    </TentacleElement>
-  </MarineContainer>
+export const MarineTentacle = ({ position = {}, duration = 18, delay = 0, size = '220px', color }) => (
+  <Ribbon
+    $width={size}
+    $height="40px"
+    $left={position.left || '45%'}
+    $top={position.top || '55%'}
+    $duration={duration}
+    $delay={delay}
+    $opacity={0.18}
+    $from={color || 'rgba(88, 199, 212, 0.32)'}
+  />
 )
 
-export const MarineElements = ({ density = 'normal', showBackground = true, divingTheme = false }) => {
-  const getDensityConfig = () => {
-    if (divingTheme) {
-      // Pour les pages de plongée : plus d'emojis marins spécifiques
-      switch (density) {
-        case 'light':
-          return { count: 6, types: ['merou', 'octopus', 'jellyfish', 'diving'] }
-        case 'normal':
-          return { count: 10, types: ['merou', 'octopus', 'jellyfish', 'diving', 'coral', 'seahorse', 'starfish'] }
-        case 'heavy':
-          return { count: 15, types: ['merou', 'octopus', 'jellyfish', 'diving', 'coral', 'seahorse', 'starfish', 'shell'] }
-        default:
-          return { count: 10, types: ['merou', 'octopus', 'jellyfish', 'diving', 'coral', 'seahorse', 'starfish'] }
-      }
-    } else {
-      // Pour les autres pages : plus discret avec des éléments simples
-      switch (density) {
-        case 'light':
-          return { count: 3, types: ['wave', 'anchor'] }
-        case 'normal':
-          return { count: 5, types: ['wave', 'anchor', 'shell'] }
-        case 'heavy':
-          return { count: 8, types: ['wave', 'anchor', 'shell', 'starfish'] }
-        default:
-          return { count: 5, types: ['wave', 'anchor', 'shell'] }
-      }
-    }
-  }
-
-  const config = getDensityConfig()
-  const elements = []
-
-  for (let i = 0; i < config.count; i++) {
-    const type = config.types[Math.floor(Math.random() * config.types.length)]
-    const componentType = Math.random()
-    
-    let Component
-    if (componentType < 0.4) {
-      Component = MarineFloat
-    } else if (componentType < 0.8) {
-      Component = MarineSwim
-    } else {
-      Component = MarineTentacle
-    }
-
-    elements.push(
-      <Component
-        key={i}
-        type={type}
-        position={{
-          top: `${Math.random() * 80 + 10}%`,
-          left: `${Math.random() * 80 + 10}%`
-        }}
-        duration={Math.random() * 4 + 3}
-        delay={Math.random() * 3}
-        size={`${Math.random() * 1.5 + 1}rem`}
-        zIndex={Math.floor(Math.random() * 3) + 1}
-      />
-    )
-  }
+export const MarineElements = ({ density = 'normal', divingTheme = false }) => {
+  const config = densityMap[density] || densityMap.normal
 
   return (
-    <>
-      {elements}
-    </>
+    <Field aria-hidden="true">
+      {Array.from({ length: config.bubbles }, (_, index) => {
+        const bubble = createBubbleConfig(index, divingTheme)
+        return (
+          <Bubble
+            key={`bubble-${index}`}
+            $size={bubble.size}
+            $left={bubble.left}
+            $top={bubble.top}
+            $delay={bubble.delay}
+            $duration={bubble.duration}
+            $opacity={bubble.opacity}
+            $fill={bubble.fill}
+            $border={bubble.border}
+            $glow={bubble.glow}
+          />
+        )
+      })}
+
+      {Array.from({ length: config.currents }, (_, index) => {
+        const current = createCurrentConfig(index, divingTheme)
+        return (
+          <Current
+            key={`current-${index}`}
+            $width={current.width}
+            $left={current.left}
+            $top={current.top}
+            $delay={current.delay}
+            $duration={current.duration}
+            $opacity={current.opacity}
+            $color={current.color}
+          />
+        )
+      })}
+
+      {Array.from({ length: config.ribbons }, (_, index) => {
+        const ribbon = createRibbonConfig(index, divingTheme)
+        return (
+          <Ribbon
+            key={`ribbon-${index}`}
+            $width={ribbon.width}
+            $height={ribbon.height}
+            $left={ribbon.left}
+            $top={ribbon.top}
+            $delay={ribbon.delay}
+            $duration={ribbon.duration}
+            $opacity={ribbon.opacity}
+            $from={ribbon.from}
+          />
+        )
+      })}
+    </Field>
   )
 }
 
-export const MarineBackground = ({ children, density = 'normal' }) => {
-  const getDensityConfig = () => {
-    switch (density) {
-      case 'light':
-        return { count: 3, types: ['fish', 'wave'] }
-      case 'normal':
-        return { count: 6, types: ['fish', 'octopus', 'wave', 'shell'] }
-      case 'heavy':
-        return { count: 10, types: ['fish', 'octopus', 'merou', 'wave', 'shell', 'starfish', 'coral'] }
-      default:
-        return { count: 6, types: ['fish', 'octopus', 'wave', 'shell'] }
-    }
-  }
+export const MarineBackground = ({ children, density = 'normal' }) => (
+  <div style={{ position: 'relative', overflow: 'hidden' }}>
+    <MarineElements density={density} />
+    {children}
+  </div>
+)
 
-  const config = getDensityConfig()
-  const elements = []
-
-  for (let i = 0; i < config.count; i++) {
-    const type = config.types[Math.floor(Math.random() * config.types.length)]
-    const isFloating = Math.random() > 0.5
-    const Component = isFloating ? MarineFloat : MarineSwim
-
-    elements.push(
-      <Component
-        key={i}
-        type={type}
-        position={{
-          top: `${Math.random() * 80 + 10}%`,
-          left: `${Math.random() * 80 + 10}%`
-        }}
-        duration={Math.random() * 4 + 3}
-        delay={Math.random() * 2}
-        size={`${Math.random() * 1.5 + 1}rem`}
-        zIndex={Math.floor(Math.random() * 3) + 1}
-      />
-    )
-  }
-
-  return (
-    <div style={{ position: 'relative', overflow: 'hidden' }}>
-      {elements}
-      {children}
-    </div>
-  )
-}
-
-export default MarineIcon
+export default MarineElements

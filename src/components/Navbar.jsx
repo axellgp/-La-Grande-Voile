@@ -1,377 +1,459 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, User, Calendar, LogOut, Settings } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Calendar, Compass, LogOut, Menu, Settings, User, Waves, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
-const NavbarContainer = styled.nav`
+const NavbarShell = styled.header`
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: ${props => props.theme.zIndices.sticky};
-  background: ${props => props.$scrolled ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.9)'};
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid ${props => props.$scrolled ? props.theme.colors.neutral[200] : 'transparent'};
-  transition: all ${props => props.theme.transitions.normal};
+  inset: 0 0 auto 0;
+  z-index: ${({ theme }) => theme.zIndices.sticky};
+  padding: ${({ theme }) => `${theme.spacing[4]} 0`};
+  pointer-events: none;
 `
 
-const NavbarContent = styled.div`
-  max-width: 1200px;
+const NavbarFrame = styled.nav`
+  width: min(1320px, calc(100% - 1.25rem));
   margin: 0 auto;
-  padding: 0 ${props => props.theme.spacing[4]};
+  padding: ${({ theme }) => `${theme.spacing[3]} ${theme.spacing[4]}`};
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 80px;
-`
+  gap: ${({ theme }) => theme.spacing[4]};
+  pointer-events: auto;
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  border: 1px solid ${({ theme, $scrolled }) =>
+    $scrolled ? 'rgba(180, 224, 241, 0.18)' : 'rgba(180, 224, 241, 0.12)'};
+  background: ${({ $scrolled }) =>
+    $scrolled ? 'rgba(7, 25, 39, 0.88)' : 'rgba(7, 25, 39, 0.66)'};
+  box-shadow: ${({ theme }) => theme.shadows.base};
+  backdrop-filter: blur(26px);
 
-const Logo = styled(Link)`
-  font-family: ${props => props.theme.fonts.heading};
-  font-size: ${props => props.theme.fontSizes['2xl']};
-  font-weight: ${props => props.theme.fontWeights.bold};
-  color: ${props => props.theme.colors.primary.main};
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: ${props => props.theme.spacing[2]};
-
-  &:hover {
-    color: ${props => props.theme.colors.primary.light};
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    width: min(100%, calc(100% - 0.75rem));
+    padding: ${({ theme }) => `${theme.spacing[3]} ${theme.spacing[3]}`};
   }
 `
 
-const LogoIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary.main}, ${props => props.theme.colors.secondary.main});
-  border-radius: ${props => props.theme.radii.lg};
-  display: flex;
+const Brand = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[3]};
+  min-width: 0;
+`
+
+const BrandMark = styled.span`
+  width: 3rem;
+  height: 3rem;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 18px;
+  border-radius: 1rem;
+  color: ${({ theme }) => theme.colors.neutral.white};
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.25), transparent 45%),
+    ${({ theme }) => theme.colors.gradients.button};
+  box-shadow: ${({ theme }) => theme.shadows.glow};
 `
 
-const NavLinks = styled.div`
+const BrandText = styled.span`
   display: flex;
-  align-items: center;
-  gap: ${props => props.theme.spacing[8]};
+  flex-direction: column;
+  min-width: 0;
 
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
-    display: none;
-  }
-`
-
-const NavLink = styled(Link)`
-  color: ${props => props.$active ? props.theme.colors.primary.main : props.theme.colors.neutral[700]};
-  font-weight: ${props => props.$active ? props.theme.fontWeights.semibold : props.theme.fontWeights.medium};
-  text-decoration: none;
-  transition: color ${props => props.theme.transitions.fast};
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    width: ${props => props.$active ? '100%' : '0'};
-    height: 2px;
-    bottom: -4px;
-    left: 0;
-    background: linear-gradient(90deg, ${props => props.theme.colors.primary.main}, ${props => props.theme.colors.secondary.main});
-    transition: width ${props => props.theme.transitions.normal};
+  strong {
+    font-family: ${({ theme }) => theme.fonts.heading};
+    font-size: clamp(1.45rem, 2vw, 2rem);
+    line-height: 1;
+    color: ${({ theme }) => theme.colors.neutral.white};
   }
 
-  &:hover {
-    color: ${props => props.theme.colors.primary.main};
-    
-    &::after {
-      width: 100%;
+  small {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.62rem;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    small {
+      display: none;
     }
   }
 `
 
-const UserMenu = styled.div`
-  position: relative;
+const DesktopNav = styled.div`
   display: flex;
   align-items: center;
-  gap: ${props => props.theme.spacing[4]};
-`
+  gap: ${({ theme }) => theme.spacing[3]};
 
-const UserButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${props => props.theme.spacing[2]};
-  padding: ${props => props.theme.spacing[2]} ${props => props.theme.spacing[3]};
-  background: ${props => props.theme.colors.neutral.white};
-  border: 1px solid ${props => props.theme.colors.neutral[200]};
-  border-radius: ${props => props.theme.radii.lg};
-  cursor: pointer;
-  transition: all ${props => props.theme.transitions.fast};
-  color: ${props => props.theme.colors.neutral[700]};
-
-  &:hover {
-    background: ${props => props.theme.colors.neutral[50]};
-    border-color: ${props => props.theme.colors.primary.main};
-  }
-
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
     display: none;
   }
 `
 
-const MobileMenuButton = styled.button`
-  display: none;
-  background: none;
-  color: ${props => props.theme.colors.neutral[700]};
-  cursor: pointer;
-  padding: ${props => props.theme.spacing[2]};
-
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-`
-
-const MobileMenu = styled(motion.div)`
-  position: fixed;
-  top: 80px;
-  left: 0;
-  right: 0;
-  background: ${props => props.theme.colors.neutral.white};
-  border-bottom: 1px solid ${props => props.theme.colors.neutral[200]};
-  padding: ${props => props.theme.spacing[6]} ${props => props.theme.spacing[4]};
+const NavPill = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: ${props => props.theme.spacing[4]};
-  box-shadow: ${props => props.theme.shadows.lg};
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  padding: ${({ theme }) => theme.spacing[2]};
+  border-radius: ${({ theme }) => theme.radii.full};
+  border: 1px solid rgba(180, 224, 241, 0.14);
+  background: rgba(255, 255, 255, 0.04);
 `
 
-const MobileNavLink = styled(Link)`
-  color: ${props => props.$active ? props.theme.colors.primary.main : props.theme.colors.neutral[700]};
-  font-weight: ${props => props.$active ? props.theme.fontWeights.semibold : props.theme.fontWeights.medium};
-  text-decoration: none;
-  padding: ${props => props.theme.spacing[3]} 0;
-  border-bottom: 1px solid ${props => props.theme.colors.neutral[100]};
-  transition: color ${props => props.theme.transitions.fast};
+const NavItem = styled(Link)`
+  position: relative;
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
+  border-radius: ${({ theme }) => theme.radii.full};
+  color: ${({ theme, $active }) =>
+    $active ? theme.colors.neutral.white : theme.colors.neutral[300]};
+  background: ${({ $active }) =>
+    $active ? 'rgba(255, 255, 255, 0.08)' : 'transparent'};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
 
   &:hover {
-    color: ${props => props.theme.colors.primary.main};
+    color: ${({ theme }) => theme.colors.neutral.white};
+    background: rgba(255, 255, 255, 0.06);
+  }
+`
+
+const Actions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[3]};
+  margin-left: auto;
+`
+
+const InfoTag = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
+  border-radius: ${({ theme }) => theme.radii.full};
+  border: 1px solid rgba(180, 224, 241, 0.12);
+  color: ${({ theme }) => theme.colors.neutral[300]};
+  background: rgba(255, 255, 255, 0.04);
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  svg {
+    color: ${({ theme }) => theme.colors.secondary.light};
   }
 
-  &:last-child {
-    border-bottom: none;
+  @media (max-width: ${({ theme }) => theme.breakpoints.xl}) {
+    display: none;
+  }
+`
+
+const UserBlock = styled.div`
+  position: relative;
+`
+
+const UserButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  min-height: 3rem;
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
+  border-radius: ${({ theme }) => theme.radii.full};
+  border: 1px solid rgba(180, 224, 241, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: ${({ theme }) => theme.colors.neutral.white};
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
 `
 
 const Dropdown = styled(motion.div)`
   position: absolute;
-  top: 100%;
+  top: calc(100% + 0.75rem);
   right: 0;
-  background: ${props => props.theme.colors.neutral.white};
-  border: 1px solid ${props => props.theme.colors.neutral[200]};
-  border-radius: ${props => props.theme.radii.lg};
-  box-shadow: ${props => props.theme.shadows.lg};
-  padding: ${props => props.theme.spacing[2]};
-  min-width: 200px;
-  z-index: ${props => props.theme.zIndices.dropdown};
+  width: 15rem;
+  padding: ${({ theme }) => theme.spacing[2]};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(8, 29, 44, 0.94);
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+  backdrop-filter: blur(24px);
 `
 
-const DropdownItem = styled(Link)`
+const DropdownLink = styled(Link)`
   display: flex;
   align-items: center;
-  gap: ${props => props.theme.spacing[2]};
-  padding: ${props => props.theme.spacing[3]} ${props => props.theme.spacing[4]};
-  color: ${props => props.theme.colors.neutral[700]};
-  text-decoration: none;
-  border-radius: ${props => props.theme.radii.md};
-  transition: background ${props => props.theme.transitions.fast};
+  gap: ${({ theme }) => theme.spacing[3]};
+  width: 100%;
+  padding: ${({ theme }) => `${theme.spacing[3]} ${theme.spacing[4]}`};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  color: ${({ theme }) => theme.colors.neutral[200]};
 
   &:hover {
-    background: ${props => props.theme.colors.neutral[50]};
-    color: ${props => props.theme.colors.primary.main};
+    background: rgba(255, 255, 255, 0.06);
+    color: ${({ theme }) => theme.colors.neutral.white};
   }
 `
 
-const DropdownButton = styled.button`
+const DropdownAction = styled.button`
   display: flex;
   align-items: center;
-  gap: ${props => props.theme.spacing[2]};
-  padding: ${props => props.theme.spacing[3]} ${props => props.theme.spacing[4]};
-  color: ${props => props.theme.colors.neutral[700]};
-  background: none;
-  border: none;
-  border-radius: ${props => props.theme.radii.md};
-  cursor: pointer;
-  transition: background ${props => props.theme.transitions.fast};
+  gap: ${({ theme }) => theme.spacing[3]};
   width: 100%;
+  padding: ${({ theme }) => `${theme.spacing[3]} ${theme.spacing[4]}`};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  color: ${({ theme }) => theme.colors.neutral[200]};
   text-align: left;
 
   &:hover {
-    background: ${props => props.theme.colors.neutral[50]};
-    color: ${props => props.theme.colors.primary.main};
+    background: rgba(255, 255, 255, 0.06);
+    color: ${({ theme }) => theme.colors.neutral.white};
   }
 `
 
+const AuthLinks = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[3]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: none;
+  }
+`
+
+const MobileToggle = styled.button`
+  display: none;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(180, 224, 241, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: ${({ theme }) => theme.colors.neutral.white};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    display: inline-flex;
+  }
+`
+
+const MobilePanel = styled(motion.div)`
+  pointer-events: auto;
+  width: min(1320px, calc(100% - 1.25rem));
+  margin: ${({ theme }) => `${theme.spacing[3]} auto 0`};
+  padding: ${({ theme }) => theme.spacing[4]};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(7, 25, 39, 0.94);
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+  backdrop-filter: blur(26px);
+
+  @media (min-width: calc(${({ theme }) => theme.breakpoints.lg} + 1px)) {
+    display: none;
+  }
+`
+
+const MobileList = styled.div`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[3]};
+`
+
+const MobileNavItem = styled(Link)`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing[3]};
+  padding: ${({ theme }) => `${theme.spacing[3]} ${theme.spacing[4]}`};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  color: ${({ theme, $active }) =>
+    $active ? theme.colors.neutral.white : theme.colors.neutral[300]};
+  background: ${({ $active }) =>
+    $active ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)'};
+  border: 1px solid ${({ $active }) =>
+    $active ? 'rgba(135, 237, 246, 0.16)' : 'transparent'};
+`
+
+const MobileActions = styled.div`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[3]};
+  margin-top: ${({ theme }) => theme.spacing[4]};
+`
+
+const navigation = [
+  { path: '/', label: 'Accueil' },
+  { path: '/rooms', label: 'Appartements' },
+  { path: '/reservation', label: 'Reservation' },
+  { path: '/calendrier', label: 'Disponibilites' },
+  { path: '/a-propos', label: 'Residence' },
+  { path: '/contact', label: 'Contact' },
+]
+
 const Navbar = () => {
+  const location = useLocation()
+  const { user, isLoggedIn, isAdmin, logout } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const location = useLocation()
-  const { user, isLoggedIn, isAdmin, logout } = useAuth()
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   useEffect(() => {
     setMobileMenuOpen(false)
     setUserMenuOpen(false)
-  }, [location])
+  }, [location.pathname])
 
-  const handleLogout = () => {
-    logout()
-    setUserMenuOpen(false)
-  }
-
-  const navItems = [
-    { path: '/', label: 'Accueil' },
-    { path: '/rooms', label: 'Appartements' },
-    { path: '/reservation', label: 'Réserver' },
-    { path: '/calendrier', label: 'Disponibilités' },
-    { path: '/a-propos', label: 'À propos' },
-    { path: '/contact', label: 'Contact' },
-  ]
+  const userLabel = useMemo(() => {
+    if (!user) return ''
+    return [user.firstName, user.lastName].filter(Boolean).join(' ')
+  }, [user])
 
   return (
-    <NavbarContainer $scrolled={scrolled}>
-      <NavbarContent>
-        <Logo to="/">
-          <LogoIcon>LGV</LogoIcon>
-          La Grande Voile
-        </Logo>
+    <NavbarShell>
+      <NavbarFrame $scrolled={scrolled}>
+        <Brand to="/">
+          <BrandMark>
+            <Waves size={18} />
+          </BrandMark>
+          <BrandText>
+            <strong>La Grande Voile</strong>
+            <small>Residence face a la baie de Banyuls</small>
+          </BrandText>
+        </Brand>
 
-        <NavLinks>
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              $active={location.pathname === item.path}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </NavLinks>
+        <DesktopNav>
+          <NavPill>
+            {navigation.map((item) => (
+              <NavItem key={item.path} to={item.path} $active={location.pathname === item.path}>
+                {item.label}
+              </NavItem>
+            ))}
+          </NavPill>
+        </DesktopNav>
 
-        <UserMenu>
+        <Actions>
+          <InfoTag>
+            <Compass size={14} />
+            Mer, plongee, terrasses et vue panoramique
+          </InfoTag>
+
           {isLoggedIn ? (
-            <div style={{ position: 'relative' }}>
-              <UserButton onClick={() => setUserMenuOpen(!userMenuOpen)}>
-                <User size={20} />
-                {user.firstName}
+            <UserBlock>
+              <UserButton onClick={() => setUserMenuOpen((open) => !open)}>
+                <User size={16} />
+                {userLabel || 'Mon compte'}
               </UserButton>
-              
+
               <AnimatePresence>
                 {userMenuOpen && (
                   <Dropdown
-                    initial={{ opacity: 0, y: -10 }}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.22 }}
                   >
-                    <DropdownItem to="/profile">
+                    <DropdownLink to="/profile">
                       <User size={16} />
-                      Mon Profil
-                    </DropdownItem>
-                    <DropdownItem to="/reservations">
+                      Mon profil
+                    </DropdownLink>
+                    <DropdownLink to="/reservations">
                       <Calendar size={16} />
-                      Mes Réservations
-                    </DropdownItem>
+                      Mes reservations
+                    </DropdownLink>
                     {isAdmin && (
-                      <DropdownItem to="/admin">
+                      <DropdownLink to="/admin">
                         <Settings size={16} />
                         Administration
-                      </DropdownItem>
+                      </DropdownLink>
                     )}
-                    <DropdownButton onClick={handleLogout}>
+                    <DropdownAction onClick={logout}>
                       <LogOut size={16} />
-                      Déconnexion
-                    </DropdownButton>
+                      Deconnexion
+                    </DropdownAction>
                   </Dropdown>
                 )}
               </AnimatePresence>
-            </div>
+            </UserBlock>
           ) : (
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <Link to="/login" className="btn btn-outline">
+            <AuthLinks>
+              <Link to="/login" className="btn btn-secondary">
                 Connexion
               </Link>
-              <Link to="/register" className="btn btn-primary">
-                Inscription
+              <Link to="/reservation" className="btn btn-primary">
+                Reserver
               </Link>
-            </div>
+            </AuthLinks>
           )}
 
-          <MobileMenuButton onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </MobileMenuButton>
-        </UserMenu>
-      </NavbarContent>
+          <MobileToggle onClick={() => setMobileMenuOpen((open) => !open)}>
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+          </MobileToggle>
+        </Actions>
+      </NavbarFrame>
 
       <AnimatePresence>
         {mobileMenuOpen && (
-          <MobileMenu
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
+          <MobilePanel
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.24 }}
           >
-            {navItems.map((item) => (
-              <MobileNavLink
-                key={item.path}
-                to={item.path}
-                $active={location.pathname === item.path}
-              >
-                {item.label}
-              </MobileNavLink>
-            ))}
-            
-            {isLoggedIn ? (
-              <>
-                <MobileNavLink to="/profile">Mon Profil</MobileNavLink>
-                <MobileNavLink to="/reservations">Mes Réservations</MobileNavLink>
-                {isAdmin && <MobileNavLink to="/admin">Administration</MobileNavLink>}
-                <button 
-                  onClick={handleLogout}
-                  style={{ 
-                    background: 'none', 
-                    border: 'none', 
-                    textAlign: 'left',
-                    padding: '12px 0',
-                    color: 'inherit',
-                    cursor: 'pointer'
-                  }}
+            <MobileList>
+              {navigation.map((item) => (
+                <MobileNavItem
+                  key={item.path}
+                  to={item.path}
+                  $active={location.pathname === item.path}
                 >
-                  Déconnexion
-                </button>
-              </>
-            ) : (
-              <>
-                <MobileNavLink to="/login">Connexion</MobileNavLink>
-                <MobileNavLink to="/register">Inscription</MobileNavLink>
-              </>
-            )}
-          </MobileMenu>
+                  <span>{item.label}</span>
+                  <span>→</span>
+                </MobileNavItem>
+              ))}
+            </MobileList>
+
+            <MobileActions>
+              {isLoggedIn ? (
+                <>
+                  <MobileNavItem to="/profile" $active={location.pathname === '/profile'}>
+                    <span>Mon profil</span>
+                    <User size={16} />
+                  </MobileNavItem>
+                  <MobileNavItem to="/reservations" $active={location.pathname === '/reservations'}>
+                    <span>Mes reservations</span>
+                    <Calendar size={16} />
+                  </MobileNavItem>
+                  {isAdmin && (
+                    <MobileNavItem to="/admin" $active={location.pathname === '/admin'}>
+                      <span>Administration</span>
+                      <Settings size={16} />
+                    </MobileNavItem>
+                  )}
+                  <button className="btn btn-secondary" onClick={logout}>
+                    <LogOut size={16} />
+                    Deconnexion
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="btn btn-secondary">
+                    Connexion
+                  </Link>
+                  <Link to="/reservation" className="btn btn-primary">
+                    Reserver maintenant
+                  </Link>
+                </>
+              )}
+            </MobileActions>
+          </MobilePanel>
         )}
       </AnimatePresence>
-    </NavbarContainer>
+    </NavbarShell>
   )
 }
 

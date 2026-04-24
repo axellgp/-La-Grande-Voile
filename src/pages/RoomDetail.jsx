@@ -1,448 +1,453 @@
-import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Users, Ruler, Euro, MapPin } from 'lucide-react'
+import {
+  ArrowLeft,
+  Bath,
+  BedDouble,
+  Calendar,
+  Compass,
+  Download,
+  MapPin,
+  Users,
+  Waves,
+} from 'lucide-react'
 import { useBooking } from '../context/BookingContext'
 import { MarineElements } from '../components/MarineElements'
 
-const Container = styled.div`
-  min-height: 100vh;
-  padding: 2rem 0;
-  background: linear-gradient(135deg, ${props => props.theme.colors.lightBlue} 0%, ${props => props.theme.colors.cream} 100%);
+const PageShell = styled.div`
   position: relative;
   overflow: hidden;
+  padding: 7rem 0 ${({ theme }) => theme.spacing[20]};
 `
 
-const Content = styled.div`
-  max-width: 1200px;
+const Inner = styled.div`
+  width: min(1240px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 0 2rem;
 `
 
-const BackButton = styled(motion.button)`
-  background: transparent;
-  border: 2px solid ${props => props.theme.colors.primary};
-  color: ${props => props.theme.colors.primary};
-  padding: 0.8rem 1.5rem;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-bottom: 2rem;
+const TopBar = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-`
-
-const RoomCard = styled(motion.div)`
-  background: white;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-`
-
-const ImageGallery = styled.div`
-  position: relative;
-  height: 400px;
-  overflow: hidden;
-`
-
-const MainImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-`
-
-const ImageThumbnails = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  padding: 1rem;
-  overflow-x: auto;
-`
-
-const Thumbnail = styled.img`
-  width: 80px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 8px;
-  cursor: pointer;
-  border: 2px solid ${props => props.$active ? props.theme.colors.secondary : 'transparent'};
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-
-  &:hover {
-    border-color: ${props => props.theme.colors.secondary};
-  }
-`
-
-const RoomInfo = styled.div`
-  padding: 2.5rem;
-`
-
-const Header = styled.div`
-  display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 1rem;
-  }
+  gap: ${({ theme }) => theme.spacing[4]};
+  margin-bottom: ${({ theme }) => theme.spacing[6]};
+  flex-wrap: wrap;
 `
 
-const RoomTitle = styled.h1`
-  font-family: ${props => props.theme.fonts.heading};
-  font-size: 2.5rem;
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: 0.5rem;
-`
-
-const RoomType = styled.div`
-  background: ${props => props.theme.colors.secondary};
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 25px;
-  font-weight: 600;
-  display: inline-block;
-  margin-bottom: 1rem;
-`
-
-const PriceInfo = styled.div`
-  text-align: right;
-
-  @media (max-width: 768px) {
-    text-align: left;
-  }
-`
-
-const PriceContainer = styled.div`
-  background: ${props => props.theme.colors.lightBlue};
-  padding: 1.5rem;
-  border-radius: 15px;
-  margin-bottom: 1rem;
-`
-
-const PriceLabel = styled.div`
-  font-size: 0.9rem;
-  color: ${props => props.theme.colors.darkGray};
-  margin-bottom: 0.3rem;
-`
-
-const Price = styled.div`
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: 0.2rem;
-`
-
-const SeasonNote = styled.div`
-  font-size: 0.8rem;
-  color: ${props => props.theme.colors.darkGray};
-`
-
-const Description = styled.p`
-  font-size: 1.1rem;
-  line-height: 1.8;
-  color: ${props => props.theme.colors.darkGray};
-  margin-bottom: 2rem;
-`
-
-const Features = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin: 2rem 0;
-`
-
-const FeatureCard = styled.div`
-  background: ${props => props.theme.colors.cream};
-  padding: 1.5rem;
-  border-radius: 15px;
-  text-align: center;
-`
-
-const FeatureIcon = styled.div`
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, ${props => props.theme.colors.secondary} 100%);
-  border-radius: 50%;
-  display: flex;
+const BackButton = styled.button`
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem;
-  color: white;
+  gap: ${({ theme }) => theme.spacing[2]};
+  min-height: 3rem;
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
+  border-radius: ${({ theme }) => theme.radii.full};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(255, 255, 255, 0.05);
+  color: ${({ theme }) => theme.colors.neutral.white};
 `
 
-const FeatureTitle = styled.h3`
-  font-family: ${props => props.theme.fonts.heading};
-  font-size: 1.2rem;
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: 0.5rem;
+const Availability = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[4]}`};
+  border-radius: ${({ theme }) => theme.radii.full};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: ${({ $available }) =>
+    $available ? 'rgba(54, 211, 153, 0.12)' : 'rgba(251, 113, 133, 0.12)'};
+  color: ${({ theme }) => theme.colors.neutral.white};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 `
 
-const FeatureValue = styled.p`
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: ${props => props.theme.colors.darkGray};
+const MainGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  gap: ${({ theme }) => theme.spacing[6]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const Gallery = styled(motion.section)`
+  padding: ${({ theme }) => theme.spacing[5]};
+  border-radius: ${({ theme }) => theme.radii['3xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(8, 29, 44, 0.84);
+  box-shadow: ${({ theme }) => theme.shadows.base};
+`
+
+const MainImage = styled.div`
+  height: 34rem;
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  background-position: center;
+  background-size: cover;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 30%, rgba(4, 16, 28, 0.78) 100%);
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    height: 24rem;
+  }
+`
+
+const ThumbnailRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing[3]};
+  margin-top: ${({ theme }) => theme.spacing[4]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+`
+
+const Thumbnail = styled.button`
+  height: 5.5rem;
+  border-radius: ${({ theme }) => theme.radii.lg};
+  border: 1px solid ${({ $active }) =>
+    $active ? 'rgba(135, 237, 246, 0.3)' : 'rgba(180, 224, 241, 0.08)'};
+  background:
+    linear-gradient(180deg, rgba(4, 16, 28, 0.1), rgba(4, 16, 28, 0.55)),
+    url('${({ $image }) => $image}') center/cover no-repeat;
+  box-shadow: ${({ $active, theme }) => ($active ? theme.shadows.glow : 'none')};
+`
+
+const Summary = styled(motion.aside)`
+  position: sticky;
+  top: 7.2rem;
+  align-self: start;
+  padding: ${({ theme }) => theme.spacing[6]};
+  border-radius: ${({ theme }) => theme.radii['3xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(8, 29, 44, 0.92);
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    position: static;
+  }
+
+  h1 {
+    margin: ${({ theme }) => `${theme.spacing[4]} 0 ${theme.spacing[3]}`};
+    font-size: clamp(2.6rem, 6vw, 4rem);
+  }
+`
+
+const Meta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing[2]};
+  margin-bottom: ${({ theme }) => theme.spacing[5]};
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: ${({ theme }) => theme.colors.neutral[200]};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+  }
+`
+
+const PricePanel = styled.div`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[3]};
+  margin: ${({ theme }) => `${theme.spacing[5]} 0`};
+  padding: ${({ theme }) => theme.spacing[5]};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  background: linear-gradient(180deg, rgba(88, 199, 212, 0.12), rgba(8, 29, 44, 0.16));
+  border: 1px solid rgba(135, 237, 246, 0.12);
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    gap: ${({ theme }) => theme.spacing[4]};
+    color: ${({ theme }) => theme.colors.neutral[200]};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+  }
+
+  .row strong {
+    color: ${({ theme }) => theme.colors.neutral.white};
+  }
+`
+
+const Actions = styled.div`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[3]};
+  margin-top: ${({ theme }) => theme.spacing[5]};
+`
+
+const Details = styled.section`
+  margin-top: ${({ theme }) => theme.spacing[6]};
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[6]};
+`
+
+const DetailCard = styled(motion.article)`
+  padding: ${({ theme }) => theme.spacing[6]};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(8, 29, 44, 0.74);
+  box-shadow: ${({ theme }) => theme.shadows.base};
+
+  h2 {
+    margin-bottom: ${({ theme }) => theme.spacing[4]};
+    font-size: clamp(2rem, 4vw, 2.8rem);
+  }
+
+  p {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+  }
+`
+
+const FeatureGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing[4]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const Feature = styled.div`
+  padding: ${({ theme }) => theme.spacing[5]};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(180, 224, 241, 0.08);
+
+  strong {
+    display: block;
+    margin-top: ${({ theme }) => theme.spacing[3]};
+    color: ${({ theme }) => theme.colors.neutral.white};
+  }
+
+  span {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+  }
+
+  svg {
+    color: ${({ theme }) => theme.colors.secondary.light};
+  }
 `
 
 const Amenities = styled.div`
-  margin: 2rem 0;
-`
-
-const AmenitiesTitle = styled.h3`
-  font-family: ${props => props.theme.fonts.heading};
-  font-size: 1.5rem;
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: 1rem;
-`
-
-const AmenitiesList = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.8rem;
-`
-
-const AmenityItem = styled.div`
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid ${props => props.theme.colors.lightGray};
-`
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing[2]};
 
-const AmenityIcon = styled.div`
-  width: 20px;
-  height: 20px;
-  background: ${props => props.theme.colors.secondary};
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.8rem;
-`
-
-const BookingSection = styled.div`
-  background: ${props => props.theme.colors.lightBlue};
-  padding: 2rem;
-  border-radius: 15px;
-  text-align: center;
-  margin-top: 2rem;
-`
-
-const BookButton = styled(motion.button)`
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, ${props => props.theme.colors.secondary} 100%);
-  color: white;
-  border: none;
-  padding: 1.2rem 2.5rem;
-  border-radius: 15px;
-  font-size: 1.2rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
-`
-
-const AvailabilityNote = styled.p`
-  font-size: 0.9rem;
-  color: ${props => props.theme.colors.darkGray};
-  margin-top: 1rem;
-`
-
-const UnavailableNote = styled.div`
-  background: #fee;
-  color: #d63384;
-  padding: 1rem;
-  border-radius: 10px;
-  margin-top: 1rem;
-  font-weight: 600;
-`
-
-const PlanLink = styled.a`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: ${props => props.theme.colors.secondary};
-  text-decoration: none;
-  font-weight: 600;
-  margin-top: 1rem;
-
-  &:hover {
-    text-decoration: underline;
+  span {
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(99, 211, 223, 0.08);
+    color: ${({ theme }) => theme.colors.secondary.light};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
   }
+`
+
+const EmptyState = styled.div`
+  width: min(720px, calc(100% - 2rem));
+  margin: 0 auto;
+  text-align: center;
+  padding: ${({ theme }) => theme.spacing[8]};
+  border-radius: ${({ theme }) => theme.radii['2xl']};
+  border: 1px solid ${({ theme }) => theme.colors.surface.border};
+  background: rgba(8, 29, 44, 0.8);
 `
 
 const RoomDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { rooms } = useBooking()
+  const [activeImage, setActiveImage] = useState(0)
   const [room, setRoom] = useState(null)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   useEffect(() => {
-    if (id) {
-      const selectedRoom = rooms.find(r => r.id === parseInt(id))
-      setRoom(selectedRoom)
-    }
+    if (!id) return
+    const selectedRoom = rooms.find((item) => item.id === Number(id))
+    setRoom(selectedRoom || null)
+    setActiveImage(0)
   }, [id, rooms])
 
   if (!room) {
     return (
-      <Container>
-        <Content>
-          <p>Appartement non trouvé</p>
-        </Content>
-      </Container>
+      <PageShell>
+        <MarineElements density="light" divingTheme />
+        <EmptyState>
+          <span className="eyebrow">Appartement introuvable</span>
+          <h2 style={{ marginTop: '1rem' }}>Cette fiche n est plus disponible.</h2>
+          <p style={{ margin: '1rem 0 2rem', color: '#d3e0ea' }}>
+            L appartement demande ne correspond a aucune entree actuelle. Vous pouvez revenir a la liste.
+          </p>
+          <Link to="/rooms" className="btn btn-primary">
+            Retour aux appartements
+          </Link>
+        </EmptyState>
+      </PageShell>
     )
   }
 
-  const handleImageClick = (index) => {
-    setCurrentImageIndex(index)
-  }
-
-  const handleBooking = () => {
-    navigate(`/booking/${room.id}`)
-  }
-
   return (
-    <Container>
-      <MarineElements density="light" />
-      <Content>
-        <BackButton
-          onClick={() => navigate(-1)}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <ArrowLeft size={20} />
-          Retour
-        </BackButton>
+    <PageShell>
+      <MarineElements density="normal" divingTheme />
 
-        <RoomCard
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <ImageGallery>
-            <MainImage 
-              src={room.images[currentImageIndex]} 
-              alt={room.name}
-            />
-          </ImageGallery>
-          
-          <ImageThumbnails>
-            {room.images.map((image, index) => (
-              <Thumbnail
-                key={index}
-                src={image}
-                alt={`${room.name} ${index + 1}`}
-                $active={index === currentImageIndex}
-                onClick={() => handleImageClick(index)}
-              />
-            ))}
-          </ImageThumbnails>
+      <Inner>
+        <TopBar>
+          <BackButton onClick={() => navigate(-1)}>
+            <ArrowLeft size={16} />
+            Retour
+          </BackButton>
+          <Availability $available={room.available}>
+            <Waves size={14} />
+            {room.available ? 'Disponible' : 'Indisponible'}
+          </Availability>
+        </TopBar>
 
-          <RoomInfo>
-            <Header>
-              <div>
-                <RoomTitle>{room.name}</RoomTitle>
-                <RoomType>{room.type} - {room.size}</RoomType>
+        <MainGrid>
+          <Gallery
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55 }}
+          >
+            <MainImage style={{ backgroundImage: `url(${room.images[activeImage]})` }} />
+            <ThumbnailRow>
+              {room.images.slice(0, 5).map((image, index) => (
+                <Thumbnail
+                  key={`${room.id}-${index}`}
+                  $active={activeImage === index}
+                  $image={image}
+                  onClick={() => setActiveImage(index)}
+                />
+              ))}
+            </ThumbnailRow>
+
+            <Details>
+              <DetailCard
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45 }}
+                viewport={{ once: true }}
+              >
+                <h2>Esprit du lieu</h2>
+                <p>{room.description}</p>
+              </DetailCard>
+
+              <DetailCard
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.08 }}
+                viewport={{ once: true }}
+              >
+                <h2>Configuration</h2>
+                <FeatureGrid>
+                  <Feature>
+                    <Users size={20} />
+                    <strong>Capacité</strong>
+                    <span>Jusqu a {room.capacity} voyageurs</span>
+                  </Feature>
+                  <Feature>
+                    <BedDouble size={20} />
+                    <strong>Format</strong>
+                    <span>{room.type} · {room.size}</span>
+                  </Feature>
+                  <Feature>
+                    <Bath size={20} />
+                    <strong>Confort</strong>
+                    <span>Equipements premium et espaces de vie soignes</span>
+                  </Feature>
+                </FeatureGrid>
+              </DetailCard>
+
+              <DetailCard
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.16 }}
+                viewport={{ once: true }}
+              >
+                <h2>Equipements</h2>
+                <Amenities>
+                  {room.amenities.map((amenity) => (
+                    <span key={amenity}>{amenity}</span>
+                  ))}
+                </Amenities>
+              </DetailCard>
+            </Details>
+          </Gallery>
+
+          <Summary
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.08 }}
+          >
+            <span className="eyebrow">{room.type}</span>
+            <h1>{room.name}</h1>
+            <Meta>
+              <span>
+                <Users size={14} />
+                {room.capacity} personnes
+              </span>
+              <span>
+                <MapPin size={14} />
+                {room.size}
+              </span>
+              <span>
+                <Compass size={14} />
+                Vue et rythme Banyuls
+              </span>
+            </Meta>
+
+            <p style={{ color: '#d3e0ea' }}>
+              Une fiche plus claire pour comprendre rapidement le ton du logement,
+              ses usages et son niveau de prix avant de reserver.
+            </p>
+
+            <PricePanel>
+              <div className="row">
+                <span>Basse saison</span>
+                <strong>{room.price.lowSeason}€/semaine</strong>
               </div>
-              
-              <PriceInfo>
-                <PriceContainer>
-                  <PriceLabel>À partir de</PriceLabel>
-                  <Price>{room.price.lowSeason}€</Price>
-                  <SeasonNote>par semaine</SeasonNote>
-                </PriceContainer>
-                <div style={{ fontSize: '0.9rem', color: '#666' }}>
-                  Haute saison: {room.price.highSeason}€/semaine
-                </div>
-              </PriceInfo>
-            </Header>
+              <div className="row">
+                <span>Moyenne saison</span>
+                <strong>{room.price.midSeason}€/semaine</strong>
+              </div>
+              <div className="row">
+                <span>Haute saison</span>
+                <strong>{room.price.highSeason}€/semaine</strong>
+              </div>
+            </PricePanel>
 
-            <Description>{room.description}</Description>
-
-            <Features>
-              <FeatureCard>
-                <FeatureIcon>
-                  <Users size={24} />
-                </FeatureIcon>
-                <FeatureTitle>Capacité</FeatureTitle>
-                <FeatureValue>Jusqu'à {room.capacity} personnes</FeatureValue>
-              </FeatureCard>
-
-              <FeatureCard>
-                <FeatureIcon>
-                  <Ruler size={24} />
-                </FeatureIcon>
-                <FeatureTitle>Surface</FeatureTitle>
-                <FeatureValue>{room.size}</FeatureValue>
-              </FeatureCard>
-
-              <FeatureCard>
-                <FeatureIcon>
-                  <Euro size={24} />
-                </FeatureIcon>
-                <FeatureTitle>Prix par semaine</FeatureTitle>
-                <FeatureValue>{room.price.lowSeason}€ - {room.price.highSeason}€</FeatureValue>
-              </FeatureCard>
-            </Features>
-
-            <Amenities>
-              <AmenitiesTitle>Équipements et services</AmenitiesTitle>
-              <AmenitiesList>
-                {room.amenities.map((amenity, index) => (
-                  <AmenityItem key={index}>
-                    <AmenityIcon>✓</AmenityIcon>
-                    {amenity}
-                  </AmenityItem>
-                ))}
-              </AmenitiesList>
-            </Amenities>
-
-            {room.plan && (
-              <PlanLink href={room.plan} target="_blank" rel="noopener noreferrer">
-                <MapPin size={16} />
-                Voir le plan de l'appartement
-              </PlanLink>
-            )}
-
-            <BookingSection>
-              <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.3rem' }}>
-                Réserver cet appartement
-              </h3>
-              
-              {room.available ? (
-                <>
-                  <BookButton
-                    onClick={handleBooking}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Faire une demande de réservation
-                  </BookButton>
-                  <AvailabilityNote>
-                    Votre demande sera envoyée au propriétaire pour validation.
-                    Vous recevrez une confirmation par email.
-                  </AvailabilityNote>
-                </>
-              ) : (
-                <UnavailableNote>
-                  Cet appartement n'est actuellement pas disponible à la réservation.
-                </UnavailableNote>
+            <Actions>
+              <Link to={`/booking/${room.id}`} className="btn btn-primary">
+                <Calendar size={18} />
+                Faire une demande
+              </Link>
+              {room.plan && (
+                <a href={room.plan} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+                  <Download size={18} />
+                  Voir le plan
+                </a>
               )}
-            </BookingSection>
-          </RoomInfo>
-        </RoomCard>
-      </Content>
-    </Container>
+              <Link to="/contact" className="btn btn-outline">
+                Nous contacter
+              </Link>
+            </Actions>
+          </Summary>
+        </MainGrid>
+      </Inner>
+    </PageShell>
   )
 }
 
